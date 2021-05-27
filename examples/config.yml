@@ -1,0 +1,33 @@
+seed_everything: null
+trainer:
+  checkpoint_callback: true
+  num_nodes: 1
+  num_processes: 1
+  gpus: 1
+  progress_bar_refresh_rate: null
+  check_val_every_n_epoch: 1
+  accumulate_grad_batches: 1
+  max_epochs: 1
+  min_epochs: 1
+  max_steps: 5
+  flush_logs_every_n_steps: 1
+  precision: 64
+  weights_save_path: null
+model:
+  learning_rate: 0.001
+  beta_1: 0.9
+  beta_2: 0.999
+data:
+  data_path: ../data/ptmn90.hdf
+  params_x: [ W, L, Vgs, Vds, Vbs ]
+  params_y: [ vth, vdsat, id, gm, gmb, gds, fug
+            , cgd, cgb, cgs, cds, csb, cdb ]
+  trafo_mask_x: []
+  trafo_mask_y: [ "id", "gm", "gmb", "gds", "fug" ]
+  batch_size: 2000
+  test_split: 0.2
+  num_workers: 6
+  rng_seed: 666
+serialize: true
+device_name: ptmn90
+model_prefix: /tmp/precept

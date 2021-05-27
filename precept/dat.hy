@@ -1,0 +1,165 @@
+(import [numpy :as np])
+(import [scipy :as sp])
+(import [pandas :as pd])
+(import [h5py :as h5])
+
+(import torch)
+(import [torch.utils.data [random_split TensorDataset DataLoader]])
+
+(import [pytorch-lightning [LightningDataModule]])
+
+(import [sklearn.preprocessing [ PowerTransformer power-transform 
+                                 MinMaxScaler minmax-scale 
+                                 MaxAbsScaler maxabs-scale
+                                 QuantileTransformer quantile-transform
+                                 normalize ]])
+(import [sklearn.model_selection._split [train_test_split]])
+(import [sklearn.utils [shuffle]])
+
+(require [hy.contrib.walk [let]])
+(require [hy.contrib.loop [loop]])
+
+(defclass PreceptDataModule [LightningDataModule]
+  (defn __init__ [self ^str  data-path 
+                       ^list params-x 
+                       ^list params-y 
+                       ^list trafo-mask-x 
+                       ^list trafo-mask-y
+                  &optional ^int   [batch-size 2000]
+                            ^float [test-split 0.2]
+                            ^int   [num-workers 6]
+                            ^int   [rng-seed 666]]
+
+    f"Precept Operating Point Data Module
+
+    Mandatory Args:
+      data_path: Path to HDF5 database
+      params_x: List of input parameters
+      params_y: List of output parameters
+      trafo_mask_x: input parameters that will be transformed
+      trafo_mask_y: output parameters that will be transformed
+
+    Optional Args:
+      batch_size: default = 2000
+      test_split: split ratio between training and test data (default = 0.2)
+      num_workers: number of cpu cores for loading data (default = 6)
+      rng_seed: seed for random number generator (default = 666)
+    "
+
+    (.__init__ (super))
+
+    (setv self.data-path    data-path
+          self.batch-size   batch-size
+          self.test-split   test-split
+          self.num-workers  num-workers
+          self.rng-seed     rng-seed
+          self.params-x     params-x
+          self.params-y     params-y
+
+          self.trafo-mask-x (list (map (fn [mask] (in mask trafo-mask-x)) 
+                                       params-x))
+          self.trafo-mask-y (list (map (fn [mask] (in mask trafo-mask-y)) 
+                                       params-y))
+
+          self.num-x        (len self.params-x)
+          self.num-y        (len self.params-y))
+
+    (setv self.x-trafo      (QuantileTransformer :random-state self.rng-seed
+                                                 :output-distribution "normal")
+          self.y-trafo      (QuantileTransformer :random-state self.rng-seed
+                                                 :output-distribution "normal")
+          self.x-scaler     (MinMaxScaler :feature-range (, 0 1))
+          self.y-scaler     (MinMaxScaler :feature-range (, 0 1))))
+
+  (defn prepare-data [self]
+    (setv self.data-frame 
+            (with [hdf-file (h5.File self.data-path "r")]
+              (let [column-names (->> "columns" (get hdf-file) 
+                                                (map (fn [c] (.decode c "UTF-8"))) 
+                                                (list))
+                    data-matrix (->> "data" (get hdf-file) 
+                                            (np.array) 
+                                            (np.transpose))
+                    df (pd.DataFrame data-matrix :columns column-names)]
+                (setv (get df "gmid") (/ (get df "gm")
+                                         (get df "id"))
+                      (get df "Jd") (/ (get df "id") 
+                                       (get df "W")))
+                (.dropna df))))
+    (setv self.dims self.data-frame.shape))
+
+  (defn setup [self &optional [stage None]]
+    (if (or (= stage "fit") (is stage None))
+      (let [sat-mask (. (& (>= self.data-frame.Vds (- self.data-frame.Vgs self.data-frame.vth))
+                           (> self.data-frame.Vgs self.data-frame.vth))
+                      values)
+
+            sdf (get self.data-frame sat-mask (slice None))
+            sdf-weights (minmax-scale (- (sp.stats.zscore sdf.id.values)))
+            sat-samp (.sample sdf :n 3000000
+                                  :weights sdf-weights
+                                  :replace False 
+                                  :random-state self.rng-seed )
+
+            tdf (get self.data-frame (~ sat-mask) (slice None))
+            tdf-weights (minmax-scale (- (sp.stats.zscore tdf.id.values)))
+            tri-samp (.sample tdf :n 1000000
+                            :weights tdf-weights
+                            :replace False 
+                            :random-state self.rng-seed )
+
+            df (shuffle (pd.concat [sat-samp tri-samp] :ignore-index True))
+
+            raw-x (.to-numpy (get df self.params-x))
+            raw-y (.to-numpy (get df self.params-y))
+
+            transform (fn [array mask trafo] 
+                        (let [masked-array (get array (, (slice None) mask))
+                              trafo-array (.fit-transform trafo masked-array)]
+                          (setv (get array (, (slice None) mask)) trafo-array)
+                          array))
+
+            trafo-x (if (any self.trafo-mask-x)
+                        (transform raw-x self.trafo-mask-x self.x-trafo)
+                        raw-x)
+            
+            trafo-y (if (any self.trafo-mask-y)
+                        (transform raw-y self.trafo-mask-y self.y-trafo)
+                        raw-y)
+
+            data-x (.fit-transform self.x-scaler trafo-x)
+            data-y (.fit-transform self.y-scaler trafo-y)
+
+            (, train-x
+               valid-x
+               train-y
+               valid-y) (train-test-split data-x
+                                          data-y
+                                          :test-size self.test-split
+                                          :shuffle True
+                                          :random-state self.rng-seed)]
+
+        (setv self.train-set (TensorDataset (torch.Tensor train-x)
+                                            (torch.Tensor train-y))
+              self.valid-set (TensorDataset (torch.Tensor valid-x) 
+                                            (torch.Tensor valid-y)))
+
+        (setv self.dims (-> self.train-set (get 0) (get 0) (. shape)))))
+
+    ;(if (or (= stage "test") (is stage None))
+    ;  None)
+  )
+
+  (defn train-dataloader [self]
+    (DataLoader self.train-set :batch-size self.batch-size 
+                               :num-workers self.num-workers 
+                               :pin-memory True))
+
+  (defn val-dataloader [self]
+    (DataLoader self.valid-set :batch-size self.batch-size 
+                               :num-workers self.num-workers 
+                               :pin-memory True))
+
+  ;(defn test-dataloader [self]
+  ;  None)
+)
