@@ -103,7 +103,7 @@ import precept as pct
 - [ ] Add better logging
 - [ ] Add manpages for CLI and API
 
-## Lincense
+## License
 
 Copyright (C) 2021, Electronics & Drives Lab
 
