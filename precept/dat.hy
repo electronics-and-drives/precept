@@ -74,7 +74,7 @@
           self.y-scaler     (MinMaxScaler :feature-range (, 0 1))))
 
   (defn prepare-data [self]
-    (let [file-type (.suffix (Path self.data-path))
+    (let [file-type (. (Path self.data-path) suffix)
           process-df (fn [df]
                       (setv (get df "gmid") (/ (get df "gm")
                                                (get df "id"))
