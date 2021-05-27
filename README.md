@@ -74,11 +74,11 @@ If you need some toy data, check out
 
 ### Inference
 
-soon^TM^
+soon<sup>TM</sup>
 
 ## API
 
-soon^TM^
+soon<sup>TM</sup>
 
 Examples on how to use the API will be in the `examples/` directory of
 this repository. There will be documented scripts as well as notebooks.
@@ -96,6 +96,7 @@ import precept as pct
 - [X] Implement serialization and compile model trace to torch script
     - [ ] Implement model inference based on Flask
     - [ ] Implement model inference CLI in C++ based on torch script models
+- [ ] CSV Data support
 - [ ] Add training and inference API examples
     - [ ] Notebooks as well
 - [ ] Add better logging
