@@ -95,7 +95,11 @@
               [(in file-type [".csv"])
                (-> self.data-path
                    (pd.read-csv)
-                   (process-df))] 
+                   (process-df))]
+              [(in file-type [".tsv"])
+               (-> self.data-path
+                   (pd.read-csv :delim_whitespace True)
+                   (process-df))]
               [True (raise (TypeError (.format "File type {} not Supported!" file-type)))]))
       (setv self.dims self.data-frame.shape)))
 
