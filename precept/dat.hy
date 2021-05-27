@@ -3,6 +3,8 @@
 (import [pandas :as pd])
 (import [h5py :as h5])
 
+(import [pathlib [Path]])
+
 (import torch)
 (import [torch.utils.data [random_split TensorDataset DataLoader]])
 
@@ -72,21 +74,33 @@
           self.y-scaler     (MinMaxScaler :feature-range (, 0 1))))
 
   (defn prepare-data [self]
-    (setv self.data-frame 
-            (with [hdf-file (h5.File self.data-path "r")]
-              (let [column-names (->> "columns" (get hdf-file) 
-                                                (map (fn [c] (.decode c "UTF-8"))) 
-                                                (list))
-                    data-matrix (->> "data" (get hdf-file) 
-                                            (np.array) 
-                                            (np.transpose))
-                    df (pd.DataFrame data-matrix :columns column-names)]
-                (setv (get df "gmid") (/ (get df "gm")
-                                         (get df "id"))
-                      (get df "Jd") (/ (get df "id") 
-                                       (get df "W")))
-                (.dropna df))))
-    (setv self.dims self.data-frame.shape))
+    (let [file-type (.suffix (Path self.data-path))
+          process-df (fn [df]
+                      (setv (get df "gmid") (/ (get df "gm")
+                                               (get df "id"))
+                            (get df "Jd") (/ (get df "id") 
+                                          (get df "W")))
+                      (.dropna df))]
+      (setv self.data-frame 
+        (cond [(in file-type [".h5" ".hdf" ".hdf5"])
+               (with [hdf-file (h5.File self.data-path "r")]
+                (let [column-names (->> "columns" (get hdf-file) 
+                                                  (map (fn [c] (.decode c "UTF-8"))) 
+                                                  (list))
+                      data-matrix (->> "data" (get hdf-file) 
+                                              (np.array) 
+                                              (np.transpose))
+                      df (pd.DataFrame data-matrix :columns column-names)]
+                  (process-df df)))]
+              [(in file-type [".csv"])
+               (-> self.data-path
+                   (pd.read-csv)
+                   (process-df))]
+              [(in file-type [".tsv"])
+               (-> self.data-path
+                   (pd.read-csv :delim_whitespace True)
+                   (process-df))]))
+      (setv self.dims self.data-frame.shape)))
 
   (defn setup [self &optional [stage None]]
     (if (or (= stage "fit") (is stage None))
