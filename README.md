@@ -96,7 +96,8 @@ import precept as pct
 - [X] Implement serialization and compile model trace to torch script
     - [ ] Implement model inference based on Flask
     - [ ] Implement model inference CLI in C++ based on torch script models
-- [ ] CSV Data support
+- [X] CSV Data support
+- [ ] TSV, ASCII, PSF, nutmeg, nutbin etc... support
 - [ ] Add training and inference API examples
     - [ ] Notebooks as well
 - [ ] Add better logging
