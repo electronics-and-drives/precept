@@ -18,7 +18,7 @@ model:
   beta_1: 0.9
   beta_2: 0.999
 data:
-  data_path: ../data/ptmn90.h5
+  data_path: ../data/ptmn90.hdf
   params_x: [ W, L, Vgs, Vds, Vbs ]
   params_y: [ vth, vdsat, id, gm, gds , gmb, fug
             , cgd, cgb, cgs, cds, csb, cdb ]

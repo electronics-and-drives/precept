@@ -100,7 +100,7 @@
                (-> self.data-path
                    (pd.read-csv :delim_whitespace True)
                    (process-df))]
-              [True (raise (IOError (.format "File type {} not Supported!" file-type)))]))
+              [True (raise (TypeError (.format "File type {} not Supported!" file-type)))]))
       (setv self.dims self.data-frame.shape)))
 
   (defn setup [self &optional [stage None]]
