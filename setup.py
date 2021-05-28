@@ -9,7 +9,7 @@ with open('requirements.txt', 'r') as req:
     requirements = req.read().splitlines()
  
 setuptools.setup( name                          = package_name
-                , version                       = '0.0.1'
+                , version                       = '0.2.0'
                 , author                        = 'Yannick Uhlmann'
                 , author_email                  = 'yannick.uhlmann@reutlingen-university.de'
                 , description                   = 'Deep Learning based Primitive Device Approximation'
@@ -22,7 +22,8 @@ setuptools.setup( name                          = package_name
                                                   , 'Operating System :: POSIX :: Linux' ]
                 , python_requires               = '>=3.8'
                 , install_requires              = requirements
-                , entry_points                  = { 'console_scripts': ['pct = precept.__main__:main' ] }
+                , entry_points                  = { 'console_scripts': [ 'pct = precept.__main__:pct' 
+                                                                       , 'prc = precept.__main__:prc']}
                 , package_data                  = { '': ['*.hy', '__pycache__/*']}
                 , data_files                    = [ ('share/man/man1', ['doc/pct.1'])
                                                   , ('share/man/man8', ['doc/precept.8'])]
