@@ -23,7 +23,7 @@ setuptools.setup( name                          = package_name
                 , python_requires               = '>=3.8'
                 , install_requires              = requirements
                 , entry_points                  = { 'console_scripts': [ 'pct = precept.__main__:pct' 
-                                                                       , 'prc = precept.__main__:prc']}
+                                                                       , 'prc = precept.__main__:prc' ]}
                 , package_data                  = { '': ['*.hy', '__pycache__/*']}
                 , data_files                    = [ ('share/man/man1', ['doc/pct.1'])
                                                   , ('share/man/man8', ['doc/precept.8'])]

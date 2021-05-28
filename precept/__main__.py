@@ -16,10 +16,17 @@ This is free software, and you are welcome to redistribute it
 under certain conditions.
 """
 
+def pct():
+    print(GPL_NOTICE)
+    cli = PreceptCLI(PreceptModule, PreceptDataModule)
+    return 0
+
+def prc():
+    print("FOOBARBARBBRBABRA")
+    return 0
+
 def main():
     print(GPL_NOTICE)
-
-    cli = PreceptCLI(PreceptModule, PreceptDataModule)
     return 0
 
 if __name__ == '__main__':
