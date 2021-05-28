@@ -14,7 +14,7 @@ $ pct --config ./examples/config.yml
 ```
 
 If you need data, check out 
-[pyrdict](https://githbub.com/augustunderground/pyrdict).
+[pyrdict](https://githhub.com/augustunderground/pyrdict).
 
 ## Setup
 
@@ -70,7 +70,7 @@ align with the `params_x` and `params_y` specification in the given
 `config.yml`.
 
 If you need some toy data, check out 
-[pyrdict](https://githbub.com/augustunderground/pyrdict).
+[pyrdict](https://githhub.com/augustunderground/pyrdict).
 
 ### Inference
 
