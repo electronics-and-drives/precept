@@ -79,7 +79,9 @@
                       (setv (get df "gmid") (/ (get df "gm")
                                                (get df "id"))
                             (get df "Jd") (/ (get df "id") 
-                                          (get df "W")))
+                                          (get df "W"))
+                            (get df "A0") (/ (get df "gm") 
+                                             (get df "gds")))
                       (.dropna df))]
       (setv self.data-frame 
         (cond [(in file-type [".h5" ".hdf" ".hdf5"])
