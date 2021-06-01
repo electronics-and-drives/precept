@@ -160,9 +160,10 @@ import precept as pct
 - [X] Infer input and output size from x-parameters and y-parameters
 - [X] Implement serialization and compile model trace to torch script
     - [X] Implement model inference based on Flask
-    - [ ] Implement model inference CLI in C++ based on torch script models
+    - [ ] Trochscript C++ interface
 - [X] CSV Data support
 - [ ] TSV, ASCII, PSF, nutmeg, nutbin etc... support
+- [ ] Alternative scaling and transforming for better use with serialized models
 - [ ] Add training and inference API examples
     - [ ] Notebooks as well
 - [ ] Add better logging
