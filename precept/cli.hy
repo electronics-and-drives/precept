@@ -1,7 +1,6 @@
 (import [datetime [datetime]])
 (import [pathlib [Path]])
 
-(import joblib)
 (import dill)
 (import torch)
 
@@ -51,31 +50,18 @@
                         "num_y"     (get self.config "model" "num_y")
                         "params_x"  (get self.config "data" "params_x")
                         "params_y"  (get self.config "data" "params_y")
-                        "scale_x"   self.datamodule.x-trafo 
-                        "scale_y"   self.datamodule.x-scaler
-                        "trafo_x"   self.datamodule.y-trafo 
-                        "trafo_y"   self.datamodule.y-scaler } ]
+                        "mask_x"    (get self.config "data" "trafo_mask_x")
+                        "mask_y"    (get self.config "data" "trafo_mask_y")
+                        "trafo_x"   self.datamodule.x-trafo 
+                        "trafo_y"   self.datamodule.y-trafo 
+                        "scale_x"   self.datamodule.x-scaler
+                        "scale_y"   self.datamodule.y-scaler } ]
       (.eval model-ckpt)
       (.freeze model-ckpt)
       (setv (get model-data "model") model-ckpt)
 
       (with [dill-file (open model-file "wb")]
         (dill.dump model-data dill-file))
-
-      ;(.dump joblib self.datamodule.x-trafo  (.format "{}/{}-x.trafo" model-path device-name))
-      ;(.dump joblib self.datamodule.x-scaler (.format "{}/{}-x.scale" model-path device-name))
-      ;(.dump joblib self.datamodule.y-trafo  (.format "{}/{}-y.trafo" model-path device-name))
-      ;(.dump joblib self.datamodule.y-scaler (.format "{}/{}-y.scale" model-path device-name))
-
-      ;(when (get self.config "serialize")
-      ;  (let[path   self.model.cb-checkpoint.best-model-path
-      ;       model  (PreceptModule.load-from-checkpoint path)
-      ;       _      (.eval model)
-      ;       _      (.freeze model)
-      ;       trace (.to-torchscript model 
-      ;                              :method "trace" 
-      ;                              :example-inputs (torch.rand 1 num-x))]
-      ;  (trace.save (.format "{}/{}-model.pt" model-path device-name))))
 
       (when (get self.config "serialize")
         (-> model-ckpt 
