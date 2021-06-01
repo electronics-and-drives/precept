@@ -2,10 +2,10 @@
 (import [scipy :as sp])
 (import [pandas :as pd])
 (import [h5py :as h5])
+(import [multiprocess :as mp])
 
 (import [pathlib [Path]])
 
-(import multiprocess)
 (import torch)
 (import [torch.utils.data [random_split TensorDataset DataLoader]])
 
@@ -30,7 +30,7 @@
                        ^list trafo-mask-y
                   &optional ^int   [batch-size 2000]
                             ^float [test-split 0.2]
-                            ^int   [num-workers (multiprocess.cpu-count)]
+                            ^int   [num-workers (-> mp (.cpu-count) (/ 2) (int))]
                             ^int   [rng-seed 666]
                             ^float [sample-ratio 0.75]]
 
