@@ -6,7 +6,6 @@ import warnings
 
 from flask import Flask, request, abort
 
-#from .core import *
 from .mod import PreceptModule
 from .dat import PreceptDataModule
 from .cli import PreceptCLI
