@@ -5,16 +5,9 @@
 (import joblib)
 (import torch)
 
-;(import [sklearn.preprocessing [ PowerTransformer power-transform 
-;                                 MinMaxScaler minmax-scale 
-;                                 MaxAbsScaler maxabs-scale
-;                                 QuantileTransformer quantile-transform
-;                                 normalize ]])
-
 (import [pathlib [Path]])
 
 (import [.mod [PreceptModule]])
-;(import [precept [PreceptModule]])
 
 (require [hy.contrib.walk [let]])
 (require [hy.contrib.loop [loop]])
@@ -51,22 +44,22 @@
 
   (defn predict [self inputs]
     (with [(.no-grad torch)]
-      (let [ X (-> inputs (get self.params-x) 
-                          (.to-numpy))
+      (let [X (-> inputs (get self.params-x) 
+                         (.to-numpy))
 
-             _ (when self.mask-x 
-                  (setv (get X (, (slice None) self.trafo-mask-x))
-                        (self.x-trafo.transform (get X (, (slice None) 
-                                                       self.trafo-mask-x)))))
+            _ (when self.mask-x 
+                 (setv (get X (, (slice None) self.trafo-mask-x))
+                       (self.x-trafo.transform (get X (, (slice None) 
+                                                      self.trafo-mask-x)))))
 
-             Y (-> X (self.x-scaler.transform)
-                     (torch.DoubleTensor)
-                     (self.model)
-                     (.numpy)
-                     (self.y-scaler.inverse-transform))
+            Y (-> X (self.x-scaler.transform)
+                    (torch.Tensor)
+                    (self.model)
+                    (.numpy)
+                    (self.y-scaler.inverse-transform))
 
-             _ (when self.mask-y
-                  (setv (get Y (, (slice None) self.trafo-mask-y))
-                        (self.y-trafo.transform (get Y (, (slice None) 
-                                                       self.trafo-mask-y)))))]
+            _ (when self.mask-y
+                 (setv (get Y (, (slice None) self.trafo-mask-y))
+                       (self.y-trafo.transform (get Y (, (slice None) 
+                                                      self.trafo-mask-y)))))]
         (pd.DataFrame Y :columns self.params-y)))))
