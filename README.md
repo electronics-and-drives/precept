@@ -59,7 +59,8 @@ See comments in `./examples/config.yml`
 
 #### Data
 
-The data specified by the `data_path` field is expected to be an HDF and structured like so:
+The data specified by the `data_path` field is expected to be an HDF and
+structured like so:
 
 ```python
 In  [1]: list(map(lambda k: f"{k}: {hdf_file[k].shape}", hdf_file.keys()))
@@ -75,7 +76,24 @@ If you need some toy data, check out
 
 ### Inference
 
-soon<sup>TM</sup>
+```
+$ prc --models={"<name>" : "<path>", ... }
+```
+
+The `models` dicitonary elements has to point to a directory with the following
+structure:
+
+```
+path/to/model
+├── ptmp90-model.pt
+├── ptmp90-x.scale
+├── ptmp90-x.trafo
+├── ptmp90-y.scale
+└── ptmp90-y.trafo
+```
+
+where in this case `<path>` should be `path/to/model` and `<name>` should be
+`ptmp90`.
 
 ## API
 
