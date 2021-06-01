@@ -56,6 +56,7 @@
                         "trafo_y"   self.datamodule.y-trafo 
                         "scale_x"   self.datamodule.x-scaler
                         "scale_y"   self.datamodule.y-scaler } ]
+
       (.eval model-ckpt)
       (.freeze model-ckpt)
       (setv (get model-data "model") model-ckpt)
