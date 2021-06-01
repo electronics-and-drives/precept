@@ -108,6 +108,8 @@ The inference interface `prc` is much simpler. It takes as input only a
 dictionary to all the models that should be served. 
 
 ```yaml
+host: <string, default = localhost> # IP or hostname 
+port: <int, default = '5000'>       # Port
 models:
     <model-name>: <string> # Path to <name>-model.bin
     ...
