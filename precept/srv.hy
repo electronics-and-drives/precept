@@ -1,18 +1,26 @@
 (import [typing [Any Dict Optional Type Union]])
-(import [jsonargparse [ActionConfigFile ArgumentParser]])
+(import [jsonargparse [ArgumentParser ActionConfigFile]])
+
+(require [hy.contrib.walk [let]])
+(require [hy.contrib.loop [loop]])
 
 (defclass PreceptSRV []
   (defn __init__ [self]
     (setv self.parser (ArgumentParser))
     
-    (self.parser.add-argument "--cats" :type (get Optional int) :default 6 :help "How many cat's to print")
-    (self.parser.add-argument "--model_dirs" 
-                              :type list 
-                              :default 6 
+    (self.parser.add_argument "--config" :action ActionConfigFile)
+    
+    (self.parser.add-argument "--models" 
+                              :type dict
+                              :default {}
                               :help "List of directories to models")
     
-    (setv self.config (self.parser.parse_args)))
+    (setv self.args (self.parser.parse_args)))
 
   (defn predict [self requests]
-    (setv cats (list (take self.config.cats (repeat "🐈"))))
-    (str f"Here's a {cats} ~uwu")))
+    (print self.args.models)
+    ;(let [dirs self.config.model_dirs]
+    ;  (lfor d dirs
+    ;    (print d)))
+    ;(with [dill-file (open self.config "model_dirs")])
+  ))
