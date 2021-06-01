@@ -1,8 +1,11 @@
+(import dill)
 (import [typing [Any Dict Optional Type Union]])
 (import [jsonargparse [ArgumentParser ActionConfigFile]])
 
 (require [hy.contrib.walk [let]])
 (require [hy.contrib.loop [loop]])
+
+(import [.inf [PreceptApproximator]])
 
 (defclass PreceptSRV []
   (defn __init__ [self]
@@ -18,9 +21,10 @@
     (setv self.args (self.parser.parse_args)))
 
   (defn predict [self requests]
-    (print self.args.models)
-    ;(let [dirs self.config.model_dirs]
-    ;  (lfor d dirs
-    ;    (print d)))
-    ;(with [dill-file (open self.config "model_dirs")])
-  ))
+    (let [models (vars self.args.models)]
+      (lfor mid models
+        (let [ model-file (with [dill-file (open (get models mid) "rb")]
+                            (dill.load dill-file)) 
+             ]
+          (print model-file)
+        )))))
