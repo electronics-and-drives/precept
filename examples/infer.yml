@@ -1,0 +1,3 @@
+models:
+    ptmn90: /tmp/precept/op-ptmn90-20210601-093222/ptmn90-model.bin
+    ptmp90: /tmp/precept/op-ptmp90-20210601-093248/ptmp90-model.bin
