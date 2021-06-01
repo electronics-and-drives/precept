@@ -25,6 +25,8 @@ def pct():
 
 def prc():
     srv = PreceptSRV()
+    host, port = srv.setup()
+
     app = Flask("__main__")
 
     @app.route('/predict', methods=['POST'])
@@ -38,7 +40,7 @@ def prc():
         else:
             return res
 
-    return app.run()
+    return app.run(host = host, port = port)
 
 def main():
     print(GPL_NOTICE)
