@@ -7,10 +7,10 @@ networks with PREDICT data to model the behavior of primitive devices.
 
 ## Quick Start
 
-Adjust the `data_path` and `device_name` in `examples/config.yml` and run:
+Adjust the `data_path` and `device_name` in `examples/train.yml` and run:
 
 ```bash
-$ pct --config ./examples/config.yml
+$ pct --config ./examples/train.yml
 ```
 
 If you need data, check out 
@@ -52,10 +52,10 @@ With this the `precept` package including the `pct` command will be available.
 ### Training
 
 ```bash
-$ pct --config ./examples/config.yml
+$ pct --config ./examples/train.yml
 ```
 
-See comments in `./examples/config.yml`
+See comments in `./examples/train.yml`
 
 #### Data
 
@@ -76,25 +76,20 @@ If you need some toy data, check out
 
 ### Inference
 
-```
-$ prc --models={"<name>" : "<path>", ... }
+Start the flask server with the `prc` command and a config like the one shown
+in `examples/infer.yml`.
+
+```sh
+$ prc --config ./examples/infer.yml
 ```
 
-The `models` dicitonary elements has to point to a directory with the following
-structure:
+Then, models can be evaluated by sending requests with the following structure:
 
+```sh
+$ curl -X POST -H "Content-Type: application/json" \
+       -d '{"<model-name>": {"<param 1>": [vals...], "<param 2>": [vals...], ... }}' \
+       127.0.0.1:5000/predict
 ```
-path/to/model
-├── ptmp90-model.pt
-├── ptmp90-meta.yml
-├── ptmp90-x.scale
-├── ptmp90-x.trafo
-├── ptmp90-y.scale
-└── ptmp90-y.trafo
-```
-
-where in this case `<path>` should be `path/to/model` and `<name>` should be
-`ptmp90`.
 
 ## API
 
