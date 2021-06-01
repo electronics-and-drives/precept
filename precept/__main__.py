@@ -25,19 +25,14 @@ def pct():
     return 0
 
 def prc():
-    #app = Flask("__main__")
-
-    #@app.route('/predict', methods=['POST'])
-    #def predict():
-    #    return inf.predict(request.json)
-
-    #app.run()
-
     srv = PreceptSRV()
+    app = Flask("__main__")
 
-    print(srv.predict(666))
+    @app.route('/predict', methods=['POST'])
+    def predict():
+        return srv.predict(request.json)
 
-    return 0
+    return app.run()
 
 def main():
     print(GPL_NOTICE)
