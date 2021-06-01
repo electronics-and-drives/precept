@@ -1,4 +1,5 @@
 (import dill)
+(import [pandas :as pd])
 (import [typing [Any Dict Optional Type Union]])
 (import [jsonargparse [ArgumentParser ActionConfigFile]])
 
@@ -32,7 +33,10 @@
                   (unpack-mapping)
                   (PreceptApproximator))) ]))))
 
-  (defn predict [self inputs]
-    (print inputs)
-
-    "~uwu"))
+  (defn predict [self ^dict inputs]
+    (try 
+      (pd.DataFrame inputs)
+      (except [e ValueError]
+        (print f"ValueError: {e}\nfor inputs: {inputs}\n")
+        f"ValueError: {e}\n")
+      (else "~uwu"))))
