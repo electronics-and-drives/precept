@@ -122,14 +122,14 @@
 
             sdf (get self.data-frame sat-mask (slice None))
             sdf-weights (minmax-scale (- (sp.stats.zscore sdf.id.values)))
-            sat-samp (.sample sdf :n (int (* num-samples sample-ratio))
+            sat-samp (.sample sdf :n (int (* num-samples self.sample-ratio))
                                   :weights sdf-weights
                                   :replace False 
                                   :random-state self.rng-seed )
 
             tdf (get self.data-frame (~ sat-mask) (slice None))
             tdf-weights (minmax-scale (- (sp.stats.zscore tdf.id.values)))
-            tri-samp (.sample tdf :n (int (* num-samples (- 1.0 sample-ratio)))
+            tri-samp (.sample tdf :n (int (* num-samples (- 1.0 self.sample-ratio)))
                             :weights tdf-weights
                             :replace False 
                             :random-state self.rng-seed )
