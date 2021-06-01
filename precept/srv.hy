@@ -18,13 +18,21 @@
                               :default {}
                               :help "List of directories to models")
     
-    (setv self.args (self.parser.parse_args)))
+    (setv self.args (self.parser.parse_args))
+    (self.init-models))
 
-  (defn predict [self requests]
-    (let [models (vars self.args.models)]
-      (lfor mid models
-        (let [ model-file (with [dill-file (open (get models mid) "rb")]
-                            (dill.load dill-file)) 
-             ]
-          (print model-file)
-        )))))
+  (defn init-models [self]
+    (setv self.models 
+      (let [models (vars self.args.models)]
+        (dfor mid models
+          [ mid 
+            (with [file (open (get models mid) "rb")]
+              (-> file 
+                  (dill.load)
+                  (unpack-mapping)
+                  (PreceptApproximator))) ]))))
+
+  (defn predict [self inputs]
+    (print inputs)
+
+    "~uwu"))
