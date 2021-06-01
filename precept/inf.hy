@@ -47,8 +47,7 @@
     (setv self.x-scaler scale-x
           self.y-scaler scale-y
           self.x-trafo trafo-x
-          self.y-trafo trafo-y)
-  )
+          self.y-trafo trafo-y))
 
   (defn predict [self inputs]
     (with [(.no-grad torch)]
@@ -71,15 +70,3 @@
                         (self.y-trafo.transform (get Y (, (slice None) 
                                                        self.trafo-mask-y)))))]
         (pd.DataFrame Y :columns self.params-y)))))
-
-;(setv model-path "./models/op-ptmp90-20210528-152333/op-epoch=00-valid_loss=0.018.ckpt")
-;(setv model-path "./models/op-ptmp90-20210528-152333/ptmp90-model.pt")
-;
-;(.format "{}/{}-{}" (str (first (. (Path model-path) parents))) "ptmp90" "model.pt")
-;
-;(setv path (Path model-path))
-;(str (first path.parents))
-;
-;(setv apx (PreceptApproximator model-path :base-name "ptmp90"))
-;(PreceptApproximator "foo.asdf")
-
