@@ -86,6 +86,7 @@ structure:
 ```
 path/to/model
 ├── ptmp90-model.pt
+├── ptmp90-meta.yml
 ├── ptmp90-x.scale
 ├── ptmp90-x.trafo
 ├── ptmp90-y.scale
