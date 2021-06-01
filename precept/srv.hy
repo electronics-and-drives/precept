@@ -23,7 +23,7 @@
     (self.init-models))
 
   (defn init-models [self]
-    (setv self.models 
+    (setx self.models 
       (let [models (vars self.args.models)]
         (dfor mid models
           [ mid 
@@ -34,9 +34,12 @@
                   (PreceptApproximator))) ]))))
 
   (defn predict [self ^dict inputs]
-    (try 
-      (pd.DataFrame inputs)
-      (except [e ValueError]
-        (print f"ValueError: {e}\nfor inputs: {inputs}\n")
-        f"ValueError: {e}\n")
-      (else "~uwu"))))
+    (let [model-ids (filter (fn [m] (in m (.keys self.models))) (.keys inputs))]
+      (dfor mid model-ids
+        [ mid
+          (try 
+            (setv df (-> inputs (get mid) (pd.DataFrame)))
+          (except [e ValueError]
+            (print f"ValueError: {e}\nfor inputs: {inputs}\n")
+            NaN)
+          (else (-> self.models (get mid) (.predict df) (.to-dict)))) ]))))
