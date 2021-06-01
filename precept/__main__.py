@@ -4,7 +4,7 @@ import datetime
 import yaml
 import warnings
 
-from flask import Flask, request
+from flask import Flask, request, abort
 
 #from .core import *
 from .mod import PreceptModule
@@ -30,7 +30,14 @@ def prc():
 
     @app.route('/predict', methods=['POST'])
     def predict():
-        return srv.predict(request.json)
+        res = srv.predict(request.json)
+
+        if type(res) is int:
+            abort(res)
+        elif res is None:
+            abort(400)
+        else:
+            return res
 
     return app.run()
 
