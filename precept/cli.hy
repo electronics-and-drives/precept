@@ -2,6 +2,7 @@
 (import [pathlib [Path]])
 
 (import joblib)
+(import dill)
 (import torch)
 
 (import [pytorch-lightning.utilities.cli [LightningCLI]])
@@ -41,19 +42,43 @@
   (defn after-fit [self]
     (let [model-path  (get self.config "trainer" "default_root_dir")
           device-name (get self.config "device_name")
-          num-x       (get self.config "model" "num_x")]
 
-      (.dump joblib self.datamodule.x-trafo  (.format "{}/{}-x.trafo" model-path device-name))
-      (.dump joblib self.datamodule.x-scaler (.format "{}/{}-x.scale" model-path device-name))
-      (.dump joblib self.datamodule.y-trafo  (.format "{}/{}-y.trafo" model-path device-name))
-      (.dump joblib self.datamodule.y-scaler (.format "{}/{}-y.scale" model-path device-name))
+          best-path   self.model.cb-checkpoint.best-model-path
+          model-ckpt  (PreceptModule.load-from-checkpoint best-path)
+
+          model-file  (.format "{}/{}-model.bin" model-path device-name)
+          model-data  { "num_x"     (get self.config "model" "num_x")
+                        "num_y"     (get self.config "model" "num_y")
+                        "params_x"  (get self.config "data" "params_x")
+                        "params_y"  (get self.config "data" "params_y")
+                        "scale_x"   self.datamodule.x-trafo 
+                        "scale_y"   self.datamodule.x-scaler
+                        "trafo_x"   self.datamodule.y-trafo 
+                        "trafo_y"   self.datamodule.y-scaler } ]
+      (.eval model-ckpt)
+      (.freeze model-ckpt)
+      (setv (get model-data "model") model-ckpt)
+
+      (with [dill-file (open model-file "wb")]
+        (dill.dump model-data dill-file))
+
+      ;(.dump joblib self.datamodule.x-trafo  (.format "{}/{}-x.trafo" model-path device-name))
+      ;(.dump joblib self.datamodule.x-scaler (.format "{}/{}-x.scale" model-path device-name))
+      ;(.dump joblib self.datamodule.y-trafo  (.format "{}/{}-y.trafo" model-path device-name))
+      ;(.dump joblib self.datamodule.y-scaler (.format "{}/{}-y.scale" model-path device-name))
+
+      ;(when (get self.config "serialize")
+      ;  (let[path   self.model.cb-checkpoint.best-model-path
+      ;       model  (PreceptModule.load-from-checkpoint path)
+      ;       _      (.eval model)
+      ;       _      (.freeze model)
+      ;       trace (.to-torchscript model 
+      ;                              :method "trace" 
+      ;                              :example-inputs (torch.rand 1 num-x))]
+      ;  (trace.save (.format "{}/{}-model.pt" model-path device-name))))
 
       (when (get self.config "serialize")
-        (let[path   self.model.cb-checkpoint.best-model-path
-             model  (PreceptModule.load-from-checkpoint path)
-             _      (.eval model)
-             _      (.freeze model)
-             trace (.to-torchscript model 
-                                    :method "trace" 
-                                    :example-inputs (torch.rand 1 num-x))]
-        (trace.save (.format "{}/{}-model.pt" model-path device-name)))))))
+        (-> model-ckpt 
+            (.to-torchscript :method "trace" 
+                             :example-inputs (torch.rand 1 (get model-data "num_x")))
+            (.save (.format "{}/{}-trace.pt" model-path device-name)))))))
