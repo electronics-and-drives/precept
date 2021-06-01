@@ -13,7 +13,7 @@ from .cli import PreceptCLI
 from .srv import PreceptSRV
 
 GPL_NOTICE = f"""
-pct  Copyright (C) 2021 Electronics & Drives
+PRECEPT Copyright (C) 2021 Electronics & Drives
 This program comes with ABSOLUTELY NO WARRANTY.
 This is free software, and you are welcome to redistribute it
 under certain conditions.
