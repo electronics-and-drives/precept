@@ -30,7 +30,7 @@
                        ^list trafo-mask-y
                   &optional ^int   [batch-size 2000]
                             ^float [test-split 0.2]
-                            ^int   [num-workers (-> mp (.cpu-count) (/ 2) (int))]
+                            ^int   [num-workers (-> mp (.cpu-count) (/ 2) (int) (max 1))]
                             ^int   [rng-seed 666]
                             ^float [sample-ratio 0.75]]
 
