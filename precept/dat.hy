@@ -44,10 +44,12 @@
       trafo_mask_y: output parameters that will be transformed
 
     Optional Args:
-      batch_size: default = 2000
-      test_split: split ratio between training and test data (default = 0.2)
+      batch_size:  default = 2000
+      test_split:  split ratio between training and test data (default = 0.2)
       num_workers: number of cpu cores for loading data (default = 6)
-      rng_seed: seed for random number generator (default = 666)
+      rng_seed:    seed for random number generator (default = 666)
+      sample_ratio: ratio sampled from triode region vs saturation region
+                    (default = 0.75)
     "
 
     (.__init__ (super))
