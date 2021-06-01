@@ -5,6 +5,7 @@
 
 (import [pathlib [Path]])
 
+(import multiprocess)
 (import torch)
 (import [torch.utils.data [random_split TensorDataset DataLoader]])
 
@@ -29,8 +30,9 @@
                        ^list trafo-mask-y
                   &optional ^int   [batch-size 2000]
                             ^float [test-split 0.2]
-                            ^int   [num-workers 6]
-                            ^int   [rng-seed 666]]
+                            ^int   [num-workers (multiprocess.cpu-count)]
+                            ^int   [rng-seed 666]
+                            ^float [sample-ratio 0.75]]
 
     f"Precept Operating Point Data Module
 
@@ -53,8 +55,11 @@
     (setv self.data-path    data-path
           self.batch-size   batch-size
           self.test-split   test-split
+
+          self.sample-ratio sample-ratio
           self.num-workers  num-workers
           self.rng-seed     rng-seed
+
           self.params-x     params-x
           self.params-y     params-y
 
@@ -111,16 +116,18 @@
                            (> self.data-frame.Vgs self.data-frame.vth))
                       values)
 
+            num-samples (-> self.data-frame (. shape) (first) (/ 4) (int))
+
             sdf (get self.data-frame sat-mask (slice None))
             sdf-weights (minmax-scale (- (sp.stats.zscore sdf.id.values)))
-            sat-samp (.sample sdf :n 3000000
+            sat-samp (.sample sdf :n (int (* num-samples sample-ratio))
                                   :weights sdf-weights
                                   :replace False 
                                   :random-state self.rng-seed )
 
             tdf (get self.data-frame (~ sat-mask) (slice None))
             tdf-weights (minmax-scale (- (sp.stats.zscore tdf.id.values)))
-            tri-samp (.sample tdf :n 1000000
+            tri-samp (.sample tdf :n (int (* num-samples (- 1.0 sample-ratio)))
                             :weights tdf-weights
                             :replace False 
                             :random-state self.rng-seed )
