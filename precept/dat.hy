@@ -131,12 +131,15 @@ Returns the inverse transformed scalar or vector.
                                 lambdas-y 
                                 (repeat (first lambdas-y) (len trafo-mask-y))))
 
-    (setv self.x-trafo      (QuantileTransformer :random-state self.rng-seed
-                                                 :output-distribution "normal")
-          self.y-trafo      (QuantileTransformer :random-state self.rng-seed
-                                                 :output-distribution "normal")
-          self.x-scaler     (MinMaxScaler :feature-range (, 0 1))
-          self.y-scaler     (MinMaxScaler :feature-range (, 0 1))))
+    ;(setv self.x-trafo      (QuantileTransformer :random-state self.rng-seed
+    ;                                             :output-distribution "normal")
+    ;      self.y-trafo      (QuantileTransformer :random-state self.rng-seed
+    ;                                             :output-distribution "normal")
+    ;      self.x-scaler     (MinMaxScaler :feature-range (, 0 1))
+    ;      self.y-scaler     (MinMaxScaler :feature-range (, 0 1)))
+
+
+    )
 
   (defn prepare-data [self]
     (let [file-type (. (Path self.data-path) suffix)
@@ -197,18 +200,34 @@ Returns the inverse transformed scalar or vector.
             raw-x (.to-numpy (get df self.params-x))
             raw-y (.to-numpy (get df self.params-y))
 
-            transform (fn [array mask trafo] 
-                        (let [masked-array (get array (, (slice None) mask))
-                              trafo-array (.fit-transform trafo masked-array)]
-                          (setv (get array (, (slice None) mask)) trafo-array)
-                          array))
+            ;transform (fn [array mask trafo] 
+            ;            (let [masked-array (get array (, (slice None) mask))
+            ;                  trafo-array (.fit-transform trafo masked-array)]
+            ;              (setv (get array (, (slice None) mask)) trafo-array)
+            ;              array))
+            ;trafo-x (if (any self.trafo-mask-x)
+            ;            (transform raw-x self.trafo-mask-x self.x-trafo)
+            ;            raw-x)
+            ;trafo-y (if (any self.trafo-mask-y)
+            ;            (transform raw-y self.trafo-mask-y self.y-trafo)
+            ;            raw-y)
 
-            trafo-x (if (any self.trafo-mask-x)
-                        (transform raw-x self.trafo-mask-x self.x-trafo)
+            trafo-x (if (and (any self.trafo-mask-x) self.lambdas-x)
+                        (. (np.array (lfor (, l m x)
+                                           (zip self.lambdas-x
+                                                self.trafo-mask-x
+                                                raw-x.T)
+                                           (if m (_bct x l) x))) 
+                           T)
                         raw-x)
-            
-            trafo-y (if (any self.trafo-mask-y)
-                        (transform raw-y self.trafo-mask-y self.y-trafo)
+
+            trafo-y (if (and (any self.trafo-mask-y) self.lambdas-y)
+                        (. (np.array (lfor (, l m y) 
+                                           (zip self.lambdas-y
+                                                self.trafo-mask-y
+                                                raw-y.T) 
+                                           (if m (_bct y l) y) )) 
+                           T)
                         raw-y)
 
             data-x (.fit-transform self.x-scaler trafo-x)
