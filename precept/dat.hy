@@ -271,7 +271,7 @@ Returns the inverse transformed scalar or vector.
         (setv self.dims (-> self.train-set (get 0) (get 0) (. shape)))))
 
     ;(if (or (= stage "test") (is stage None))
-    ;  None)
+    ;  pass)
   )
 
   (defn train-dataloader [self]
@@ -285,5 +285,5 @@ Returns the inverse transformed scalar or vector.
                                :pin-memory True))
 
   ;(defn test-dataloader [self]
-  ;  None)
+  ;  pass)
 )
