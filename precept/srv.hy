@@ -49,7 +49,10 @@
                           (cond [(.endswith model-path ".pt")
                                  (torch.jit.load model-path)]
                                 [(.endswith model-path ".ckpt")
-                                 (PreceptModule.load-from-checkpoint model-path) ]
+                                 (let [mod (PreceptModule.load-from-checkpoint model-path) ]
+                                   (.eval mod)
+                                   (.freeze mod)
+                                   mod)]
                                 [True
                                  (raise (IOError "Wrong filetype, has to be (.ckpt) or (.pt)"))]))]
               (-> config (unpack-mapping) (PreceptApproximator)))])))
