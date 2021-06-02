@@ -168,7 +168,7 @@ import precept as pct
 - [ ] Add training and inference API examples
     - [ ] Notebooks as well
 - [ ] Add better logging
-- [ ] Add manpages for CLI and API
+- [ ] Add manpages for CLI(1), API(8) and CFG(5)
 
 ## License
 
