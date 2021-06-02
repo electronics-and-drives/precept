@@ -22,6 +22,46 @@
 (require [hy.contrib.walk [let]])
 (require [hy.contrib.loop [loop]])
 
+
+(defn _bct [y &optional [λ 0.2]]
+f"Box-Cox Transformation
+Takes a scalar or 1D np.array and transforms it
+according to:
+
+        λ  
+       y -1
+  y' = ――――   if λ ≠ 0
+        λ  
+
+  y' = ln(y)  if λ = 0
+
+Returns the transformed scalar or vector.
+"
+  (if (= λ 0)
+    (np.log y)
+    (/ (- (np.power y λ) 1) λ)))
+
+(defn _cbt [y′ &optional [λ 0.2]]
+f"Inverse Box-Cox Transformation (Cox-Box)
+Takes a scalar or 1D np.array and transforms it
+according to:
+
+       ⎛ln(y'∙λ+1)⎞
+       ⎜――――――――――⎟
+       ⎝    λ     ⎠
+  y = e               if λ ≠ 0
+
+       y'
+  y = e               if λ = 0
+
+Returns the inverse transformed scalar or vector.
+"
+  (if (= λ 0)
+    (np.exp y′)
+    (np.exp (/ (np.log (+ (* y′ λ) 1)) λ))))
+
+
+
 (defclass PreceptDataModule [LightningDataModule]
   (defn __init__ [self ^str  data-path 
                        ^list params-x 
@@ -35,14 +75,12 @@
                             ^float [sample-ratio 0.75]]
 
     f"Precept Operating Point Data Module
-
     Mandatory Args:
       data_path: Path to HDF5 database
       params_x: List of input parameters
       params_y: List of output parameters
       trafo_mask_x: input parameters that will be transformed
       trafo_mask_y: output parameters that will be transformed
-
     Optional Args:
       batch_size:  default = 2000
       test_split:  split ratio between training and test data (default = 0.2)
