@@ -4,7 +4,7 @@
 (require [hy.contrib.loop [loop]])
 (require [hy.extra.anaphoric [*]])
 
-(defn scl [x &optional [a 0.0] [b 1.0]]
+(defn scl [x &optional min-x max-x [a 0.0] [b 1.0]]
 f"Feature normalization (scaling)
 Takes a 1D vector and interval [a,b] and scales it according to:
 
@@ -13,8 +13,12 @@ Takes a 1D vector and interval [a,b] and scales it according to:
              ⎝max(x)-min(x)⎠  
 
 Returns the normalzied vector x'∈ [a,b]
+If an optional min-x and or max-x are given, those are used,
+otherwise their calculated from the wector.
 "
-  (+ (* (- b a) (/ (- x (np.min x)) (- (np.max x) (np.min x)))) a))
+  (let [min-x (or min-x (np.min x))
+        max-x (or max-x (np.max x))]
+    (+ (* (- b a) (/ (- x min-x) (- max-x min-x))) a)))
 
 (defn bct [y &optional [λ 0.2]]
 f"Box-Cox Transformation
