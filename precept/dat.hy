@@ -96,15 +96,7 @@
                                        params-y))))
 
   (defn prepare-data [self]
-    (let [file-type (. (Path self.data-path) suffix)
-          process-df (fn [df]
-                      (setv (get df "gmid") (/ (get df "gm")
-                                               (get df "id"))
-                            (get df "Jd") (/ (get df "id") 
-                                          (get df "W"))
-                            (get df "A0") (/ (get df "gm") 
-                                             (get df "gds")))
-                      (.dropna df))]
+    (let [file-type (. (Path self.data-path) suffix) ]
       (setv self.data-frame 
         (cond [(in file-type [".h5" ".hdf" ".hdf5"])
                (with [hdf-file (h5.File self.data-path "r")]
@@ -115,15 +107,15 @@
                                               (np.array) 
                                               (np.transpose))
                       df (pd.DataFrame data-matrix :columns column-names)]
-                  (process-df df)))]
+                  (.dropna df)))]
               [(in file-type [".csv"])
                (-> self.data-path
                    (pd.read-csv)
-                   (process-df))]
+                   (.dropna df))]
               [(in file-type [".tsv"])
                (-> self.data-path
                    (pd.read-csv :delim_whitespace True)
-                   (process-df))]
+                   (.dropna df))]
               [True (raise (TypeError (.format "File type {} not Supported!" file-type)))]))
       (setv self.dims self.data-frame.shape)))
 
