@@ -25,7 +25,7 @@ data:
   trafo_mask_x: []
   trafo_mask_y: [ id, gm, gmb, gds, fug ]
   lambdas_x: []
-  lambdas_y: [ 0.2 ]
+  lambdas_y: [ 0.2, 0.2, 0.2, 0.2, 0.2 ]
   batch_size: 2000
   test_split: 0.2
   num_workers: 6
