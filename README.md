@@ -3,7 +3,8 @@
 **Pr**imitive d**e**vi**ce** a**p**proxima**t**ion, a machine learning
 extension for the PREDICT Toolbox based on
 [Lightning](https://www.pytorchlightning.ai/). Train Neural
-networks with PREDICT data to model the behavior of primitive devices.
+networks with [PREDICT](https://github.com/electronics-and-drives/predict) 
+data to model the behavior of primitive devices.
 
 ## Setup
 
