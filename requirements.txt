@@ -14,3 +14,4 @@ jsonargparse==3.12.1
 Flask==2.0.1
 dill==0.3.3
 multiprocess==0.70.11.1
+PyYAML==5.4.1 
