@@ -109,14 +109,27 @@ Returns the inverse transformed scalar or vector.
 
           self.params-x     params-x
           self.params-y     params-y
-
-          self.trafo-mask-x (list (map (fn [mask] (in mask trafo-mask-x)) 
-                                       params-x))
-          self.trafo-mask-y (list (map (fn [mask] (in mask trafo-mask-y)) 
-                                       params-y))
-
+          
           self.num-x        (len self.params-x)
           self.num-y        (len self.params-y))
+
+    ;; Converting the column names based trafo mask to a bit mask
+    ;; for accessing a np array instead of a data frame
+    (setv self.trafo-mask-x (list (map (fn [mask] (in mask trafo-mask-x)) 
+                                       params-x))
+          self.trafo-mask-y (list (map (fn [mask] (in mask trafo-mask-y)) 
+                                       params-y)))
+
+    ;; Check if mask and lambdas line up, if they don't take the first from
+    ;; the lambdas list and repeat it as many times as necessary
+    (setv self.lambdas-x    (if (or (= (len trafo-mask-x) (len lambdas-x)) 
+                                    (not lambdas-x))
+                                lambdas-x 
+                                (repeat (first lambdas-x) (len trafo-mask-x)))
+          self.lambdas-y    (if (or (= (len trafo-mask-y) (len lambdas-y)) 
+                                    (not lambdas-y))
+                                lambdas-y 
+                                (repeat (first lambdas-y) (len trafo-mask-y))))
 
     (setv self.x-trafo      (QuantileTransformer :random-state self.rng-seed
                                                  :output-distribution "normal")
