@@ -11,11 +11,12 @@
 
 (import [pytorch-lightning [LightningDataModule]])
 
-(import [sklearn.preprocessing [ PowerTransformer power-transform 
-                                 MinMaxScaler minmax-scale 
-                                 MaxAbsScaler maxabs-scale
-                                 QuantileTransformer quantile-transform
-                                 normalize ]])
+;(import [sklearn.preprocessing [ PowerTransformer power-transform 
+;                                 MinMaxScaler minmax-scale 
+;                                 MaxAbsScaler maxabs-scale
+;                                 QuantileTransformer quantile-transform
+;                                 normalize ]])
+
 (import [sklearn.model_selection._split [train_test_split]])
 (import [sklearn.utils [shuffle]])
 
@@ -198,14 +199,16 @@ Returns the inverse transformed scalar or vector.
             num-samples (-> self.data-frame (. shape) (first) (/ 4) (int))
 
             sdf (get self.data-frame sat-mask (slice None))
-            sdf-weights (minmax-scale (- (sp.stats.zscore sdf.id.values)))
+            ;sdf-weights (minmax-scale (- (sp.stats.zscore sdf.id.values)))
+            sdf-weights (_scl (- (sp.stats.zscore sdf.id.values)))
             sat-samp (.sample sdf :n (int (* num-samples self.sample-ratio))
                                   :weights sdf-weights
                                   :replace False 
                                   :random-state self.rng-seed )
 
             tdf (get self.data-frame (~ sat-mask) (slice None))
-            tdf-weights (minmax-scale (- (sp.stats.zscore tdf.id.values)))
+            ;tdf-weights (minmax-scale (- (sp.stats.zscore tdf.id.values)))
+            sdf-weights (_scl (- (sp.stats.zscore tdf.id.values)))
             tri-samp (.sample tdf :n (int (* num-samples (- 1.0 self.sample-ratio)))
                             :weights tdf-weights
                             :replace False 
@@ -227,6 +230,8 @@ Returns the inverse transformed scalar or vector.
             ;trafo-y (if (any self.trafo-mask-y)
             ;            (transform raw-y self.trafo-mask-y self.y-trafo)
             ;            raw-y)
+            ;data-x (.fit-transform self.x-scaler trafo-x)
+            ;data-y (.fit-transform self.y-scaler trafo-y)
 
             trafo-x (if (and (any self.trafo-mask-x) self.lambdas-x)
                         (. (np.array (lfor (, l m x)
@@ -246,8 +251,8 @@ Returns the inverse transformed scalar or vector.
                            T)
                         raw-y)
 
-            data-x (.fit-transform self.x-scaler trafo-x)
-            data-y (.fit-transform self.y-scaler trafo-y)
+            data-x (np.apply-along-axis _scl 0 trafo-x)
+            data-y (np.apply-along-axis _scl 0 trafo-y)
 
             (, train-x
                valid-x
