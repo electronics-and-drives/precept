@@ -72,22 +72,29 @@ Returns the inverse transformed scalar or vector.
                             ^float [test-split 0.2]
                             ^int   [num-workers (-> mp (.cpu-count) (/ 2) (int) (max 1))]
                             ^int   [rng-seed 666]
-                            ^float [sample-ratio 0.75]]
+                            ^float [sample-ratio 0.75]
+                            ^list  [lambdas-x [0.2]]
+                            ^list  [lambdas-y [0.2]]]
 
     f"Precept Operating Point Data Module
     Mandatory Args:
-      data_path: Path to HDF5 database
-      params_x: List of input parameters
-      params_y: List of output parameters
+    ---------------
+      data_path:    Path to HDF5 database
+      params_x:     List of input parameters
+      params_y:     List of output parameters
       trafo_mask_x: input parameters that will be transformed
       trafo_mask_y: output parameters that will be transformed
+
     Optional Args:
-      batch_size:  default = 2000
-      test_split:  split ratio between training and test data (default = 0.2)
-      num_workers: number of cpu cores for loading data (default = 6)
-      rng_seed:    seed for random number generator (default = 666)
+    --------------
+      batch_size:   default = 2000
+      test_split:   split ratio between training and test data (default = 0.2)
+      num_workers:  number of cpu cores for loading data (default = 6)
+      rng_seed:     seed for random number generator (default = 666)
       sample_ratio: ratio sampled from triode region vs saturation region
                     (default = 0.75)
+      lambdas-x/y:  list of lambdas for each parameter nambed in trafo-mask-x/y,
+                    or a list with a single value, resulting in the same for all.
     "
 
     (.__init__ (super))
