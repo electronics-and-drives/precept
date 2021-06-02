@@ -1,4 +1,4 @@
-# PRECEPT
+# PRECEPT (Pre-Alpha Development)
 
 **Pr**imitive d**e**vi**ce** a**p**proxima**t**ion, a machine learning
 extension for the PREDICT Toolbox based on
