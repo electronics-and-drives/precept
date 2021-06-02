@@ -80,18 +80,8 @@
           self.trafo-mask-y (list (map (fn [param] (in param trafo-mask-y)) 
                                        params-y)))
 
-    ;; Check if mask and lambdas line up, if they don't take the first from
-    ;; the lambdas list and repeat it as many times as necessary
-    (setv self.lambdas-x    (list (map (fn [param]
-                                          (if (and (in param trafo-mask-x) lambdas-x)
-                                              (get lambdas-x (trafo-mask-x.index param))
-                                              False))
-                                       params-x))
-          self.lambdas-y    (list (map (fn [param]
-                                          (if (and (in param trafo-mask-y) lambdas-y)
-                                              (get lambdas-y (trafo-mask-y.index param))
-                                              False))
-                                       params-y))))
+    (setv self.lambdas-x lambdas-x
+          self.lambdas-y lambdas-y))
 
   (defn prepare-data [self]
     (let [file-type (. (Path self.data-path) suffix) ]
@@ -144,26 +134,18 @@
             raw-x (.to-numpy (get df self.params-x))
             raw-y (.to-numpy (get df self.params-y))
 
-            trafo-x (if (and (any self.trafo-mask-x) self.lambdas-x)
-                        (. (np.array (lfor (, l m x)
-                                           (zip self.lambdas-x
-                                                self.trafo-mask-x
-                                                raw-x.T)
-                                           (if m (bct x l) x))) 
-                           T)
-                        raw-x)
+            _ (when (and (any self.trafo-mask-x) self.lambdas-x)
+                (setv (get raw-x.T self.trafo-mask-x)
+                      (lfor (, idx x) (enumerate (get raw-x.T self.trafo-mask-x))
+                        (bct (np.array x) (get self.lambdas-x idx)))))
 
-            trafo-y (if (and (any self.trafo-mask-y) self.lambdas-y)
-                        (. (np.array (lfor (, l m y) 
-                                           (zip self.lambdas-y
-                                                self.trafo-mask-y
-                                                raw-y.T) 
-                                           (if m (bct y l) y) )) 
-                           T)
-                        raw-y)
+            _ (when (and (any self.trafo-mask-y) self.lambdas-y)
+                (setv (get raw-y.T self.trafo-mask-y)
+                      (lfor (, idx y) (enumerate (get raw-y.T self.trafo-mask-y))
+                        (bct (np.array y) (get self.lambdas-y idx)))))
 
-            data-x (np.apply-along-axis scl 0 trafo-x)
-            data-y (np.apply-along-axis scl 0 trafo-y)
+            data-x (np.apply-along-axis scl 0 raw-x)
+            data-y (np.apply-along-axis scl 0 raw-y)
 
             num-train-samples (int (* (- 1.0 self.test-split) (first data-x.shape)))
             sample-idx        (np.array (range (first data-x.shape)))
@@ -187,10 +169,10 @@
               self.valid-set (TensorDataset (torch.Tensor valid-x) 
                                             (torch.Tensor valid-y)))
 
-        (setv self.min-x (np.min trafo-x 0)
-              self.max-x (np.max trafo-x 0)
-              self.min-y (np.min trafo-y 0)
-              self.max-y (np.max trafo-y 0))
+        (setv self.min-x (np.min raw-x 0)
+              self.max-x (np.max raw-x 0)
+              self.min-y (np.min raw-y 0)
+              self.max-y (np.max raw-y 0))
 
         (setv self.dims (-> self.train-set (get 0) (get 0) (. shape)))))
 
