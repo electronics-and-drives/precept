@@ -7,6 +7,7 @@
 
 (require [hy.contrib.walk [let]])
 (require [hy.contrib.loop [loop]])
+(require [hy.extra.anaphoric [*]])
 
 (defclass PreceptModule [LightningModule]
   (defn __init__ [self ^int num-x ^int num-y

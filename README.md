@@ -164,10 +164,11 @@ import precept as pct
 - [X] CSV Data support
 - [ ] TSV, ASCII, PSF, nutmeg, nutbin etc... support
 - [ ] Alternative scaling and transforming for better use with serialized models
+- [X] Get rid of hard coded processing for additional parameter calculation
 - [ ] Add training and inference API examples
     - [ ] Notebooks as well
 - [ ] Add better logging
-- [ ] Add manpages for CLI and API
+- [ ] Add manpages for CLI(1), API(8) and CFG(5)
 
 ## License
 

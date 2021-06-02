@@ -1,8 +1,9 @@
 (import [datetime [datetime]])
 (import [pathlib [Path]])
 
-(import dill)
+(import yaml)
 (import torch)
+(import [numpy :as np])
 
 (import [pytorch-lightning.utilities.cli [LightningCLI]])
 (import [jsonargparse.typing [Path_fr Path_dw]])
@@ -11,6 +12,9 @@
 
 (require [hy.contrib.walk [let]])
 (require [hy.contrib.loop [loop]])
+(require [hy.extra.anaphoric [*]])
+
+(setv yaml.Dumper.ignore-aliases (fn [&rest args] True))
 
 (defclass PreceptCLI [LightningCLI]
   (defn add-arguments-to-parser [self parser]
@@ -45,27 +49,33 @@
           best-path   self.model.cb-checkpoint.best-model-path
           model-ckpt  (PreceptModule.load-from-checkpoint best-path)
 
-          model-file  (.format "{}/{}-model.bin" model-path device-name)
-          model-data  { "num_x"     (get self.config "model" "num_x")
-                        "num_y"     (get self.config "model" "num_y")
-                        "params_x"  (get self.config "data" "params_x")
-                        "params_y"  (get self.config "data" "params_y")
-                        "mask_x"    (get self.config "data" "trafo_mask_x")
-                        "mask_y"    (get self.config "data" "trafo_mask_y")
-                        "trafo_x"   self.datamodule.x-trafo 
-                        "trafo_y"   self.datamodule.y-trafo 
-                        "scale_x"   self.datamodule.x-scaler
-                        "scale_y"   self.datamodule.y-scaler } ]
+          model-file  (.format "{}/{}-model.yml" model-path device-name)
+          model-data  { "num_x"     self.datamodule.num-x
+                        "num_y"     self.datamodule.num-y
+                        "params_x"  self.datamodule.params-x
+                        "params_y"  self.datamodule.params-y
+                        "mask_x"    self.datamodule.mask-x
+                        "mask_y"    self.datamodule.mask-y
+                        "min_x"     (.tolist self.datamodule.min-x)
+                        "max_x"     (.tolist self.datamodule.max-x)
+                        "min_y"     (.tolist self.datamodule.min-y)
+                        "max_y"     (.tolist self.datamodule.max-y)
+                        "lambdas_x" (list (filter (fn [l] l) self.datamodule.lambdas-x))
+                        "lambdas_y" (list (filter (fn [l] l) self.datamodule.lambdas-y)) } ]
 
       (.eval model-ckpt)
       (.freeze model-ckpt)
-      (setv (get model-data "model") model-ckpt)
 
-      (with [dill-file (open model-file "wb")]
-        (dill.dump model-data dill-file))
+      (with [yml-file (open model-file "w+")]
+        (yaml.dump model-data yml-file 
+                   ;:default-flow-style False
+                   :allow-unicode True ))
 
-      (when (get self.config "serialize")
+      (if (get self.config "serialize")
         (-> model-ckpt 
             (.to-torchscript :method "trace" 
                              :example-inputs (torch.rand 1 (get model-data "num_x")))
-            (.save (.format "{}/{}-trace.pt" model-path device-name)))))))
+            (.save (.format "{}/{}-model.pt" model-path device-name)))
+        (-> model-ckpt 
+            (.state-dict) 
+            (torch.save (.format "{}/{}-model.ckpt" model-path device-name)))))))

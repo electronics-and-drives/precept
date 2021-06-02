@@ -18,16 +18,18 @@ model:
   beta_1: 0.9
   beta_2: 0.999
 data:
-  data_path: ../data/ptmp90.hdf
+  data_path: ../data/ptmn90.hdf
   params_x: [ W, L, Vgs, Vds, Vbs ]
   params_y: [ vth, vdsat, id, gm, gds , gmb, fug
             , cgd, cgb, cgs, cds, csb, cdb ]
   trafo_mask_x: []
-  trafo_mask_y: [ "id", "gm", "gmb", "gds", "fug" ]
+  trafo_mask_y: [ id, gm, gmb, gds, fug ]
+  lambdas_x: []
+  lambdas_y: [ 0.2, 0.2, 0.2, 0.2, 0.2 ]
   batch_size: 2000
   test_split: 0.2
   num_workers: 6
   rng_seed: 666
 serialize: true
-device_name: ptmp90
+device_name: ptmn90
 model_prefix: /tmp/precept
