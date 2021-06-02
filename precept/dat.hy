@@ -20,6 +20,8 @@
 (import [sklearn.model_selection._split [train_test_split]])
 (import [sklearn.utils [shuffle]])
 
+(import .util)
+
 (require [hy.contrib.walk [let]])
 (require [hy.contrib.loop [loop]])
 
@@ -149,7 +151,7 @@
 
             sdf (get self.data-frame sat-mask (slice None))
             ;sdf-weights (minmax-scale (- (sp.stats.zscore sdf.id.values)))
-            sdf-weights (_scl (- (sp.stats.zscore sdf.id.values)))
+            sdf-weights (utl.scl (- (sp.stats.zscore sdf.id.values)))
             sat-samp (.sample sdf :n (int (* num-samples self.sample-ratio))
                                   :weights sdf-weights
                                   :replace False 
@@ -157,7 +159,7 @@
 
             tdf (get self.data-frame (~ sat-mask) (slice None))
             ;tdf-weights (minmax-scale (- (sp.stats.zscore tdf.id.values)))
-            sdf-weights (_scl (- (sp.stats.zscore tdf.id.values)))
+            sdf-weights (utl.scl (- (sp.stats.zscore tdf.id.values)))
             tri-samp (.sample tdf :n (int (* num-samples (- 1.0 self.sample-ratio)))
                             :weights tdf-weights
                             :replace False 
@@ -187,7 +189,7 @@
                                            (zip self.lambdas-x
                                                 self.trafo-mask-x
                                                 raw-x.T)
-                                           (if m (_bct x l) x))) 
+                                           (if m (utl.bct x l) x))) 
                            T)
                         raw-x)
 
@@ -196,12 +198,12 @@
                                            (zip self.lambdas-y
                                                 self.trafo-mask-y
                                                 raw-y.T) 
-                                           (if m (_bct y l) y) )) 
+                                           (if m (utl.bct y l) y) )) 
                            T)
                         raw-y)
 
-            data-x (np.apply-along-axis _scl 0 trafo-x)
-            data-y (np.apply-along-axis _scl 0 trafo-y)
+            data-x (np.apply-along-axis utl.scl 0 trafo-x)
+            data-y (np.apply-along-axis utl.scl 0 trafo-y)
 
             (, train-x
                valid-x
