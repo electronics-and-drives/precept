@@ -1,24 +1,15 @@
 (import [numpy :as np])
-(import [scipy :as sp])
 (import [pandas :as pd])
 (import [h5py :as h5])
 (import [multiprocess :as mp])
 
 (import [pathlib [Path]])
+(import [scipy.stats [zscore]])
 
 (import torch)
 (import [torch.utils.data [random_split TensorDataset DataLoader]])
 
 (import [pytorch-lightning [LightningDataModule]])
-
-;(import [sklearn.preprocessing [ PowerTransformer power-transform 
-;                                 MinMaxScaler minmax-scale 
-;                                 MaxAbsScaler maxabs-scale
-;                                 QuantileTransformer quantile-transform
-;                                 normalize ]])
-
-(import [sklearn.model_selection._split [train_test_split]])
-(import [sklearn.utils [shuffle]])
 
 (import [.utl [scl bct]])
 
@@ -155,7 +146,7 @@
 
             sdf (get self.data-frame sat-mask (slice None))
             ;sdf-weights (minmax-scale (- (sp.stats.zscore sdf.id.values)))
-            sdf-weights (scl (- (sp.stats.zscore sdf.id.values)))
+            sdf-weights (scl (- (zscore sdf.id.values)))
             sat-samp (.sample sdf :n (int (* num-samples self.sample-ratio))
                                   :weights sdf-weights
                                   :replace False 
@@ -163,7 +154,7 @@
 
             tdf (get self.data-frame (~ sat-mask) (slice None))
             ;tdf-weights (minmax-scale (- (sp.stats.zscore tdf.id.values)))
-            tdf-weights (scl (- (sp.stats.zscore tdf.id.values)))
+            tdf-weights (scl (- (zscore tdf.id.values)))
             tri-samp (.sample tdf :n (int (* num-samples (- 1.0 self.sample-ratio)))
                             :weights tdf-weights
                             :replace False 
@@ -209,14 +200,22 @@
             data-x (np.apply-along-axis scl 0 trafo-x)
             data-y (np.apply-along-axis scl 0 trafo-y)
 
-            (, train-x
-               valid-x
-               train-y
-               valid-y) (train-test-split data-x
-                                          data-y
-                                          :test-size self.test-split
-                                          :shuffle True
-                                          :random-state self.rng-seed)]
+            num-train-samples (int (* (- 1.0 self.test-split) (first data-x.shape)))
+            sample-idx        (np.array (range (first data-x.shape)))
+
+            train-idx (np.random.choice sample-idx 
+                                        num-train-samples
+                                        :replace False)
+
+            valid-idx (get sample-idx (np.in1d sample-idx 
+                                               train-idx 
+                                               :assume-unique True 
+                                               :invert True))
+                                              
+            train-x (get data-x train-idx)
+            train-y (get data-y train-idx)
+            valid-x (get data-x valid-idx)
+            valid-y (get data-y valid-idx) ]
 
         (setv self.train-set (TensorDataset (torch.Tensor train-x)
                                             (torch.Tensor train-y))
