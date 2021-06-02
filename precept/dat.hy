@@ -93,17 +93,7 @@
                                           (if (and (in param trafo-mask-y) lambdas-y)
                                               (get lambdas-y (trafo-mask-y.index param))
                                               False))
-                                       params-y)))
-
-    ;(setv self.x-trafo      (QuantileTransformer :random-state self.rng-seed
-    ;                                             :output-distribution "normal")
-    ;      self.y-trafo      (QuantileTransformer :random-state self.rng-seed
-    ;                                             :output-distribution "normal")
-    ;      self.x-scaler     (MinMaxScaler :feature-range (, 0 1))
-    ;      self.y-scaler     (MinMaxScaler :feature-range (, 0 1)))
-
-
-    )
+                                       params-y))))
 
   (defn prepare-data [self]
     (let [file-type (. (Path self.data-path) suffix)
@@ -146,7 +136,6 @@
             num-samples (-> self.data-frame (. shape) (first) (/ 4) (int))
 
             sdf (get self.data-frame sat-mask (slice None))
-            ;sdf-weights (minmax-scale (- (sp.stats.zscore sdf.id.values)))
             sdf-weights (scl (- (zscore sdf.id.values)))
             sat-samp (.sample sdf :n (int (* num-samples self.sample-ratio))
                                   :weights sdf-weights
@@ -154,7 +143,6 @@
                                   :random-state self.rng-seed )
 
             tdf (get self.data-frame (~ sat-mask) (slice None))
-            ;tdf-weights (minmax-scale (- (sp.stats.zscore tdf.id.values)))
             tdf-weights (scl (- (zscore tdf.id.values)))
             tri-samp (.sample tdf :n (int (* num-samples (- 1.0 self.sample-ratio)))
                             :weights tdf-weights
@@ -165,20 +153,6 @@
 
             raw-x (.to-numpy (get df self.params-x))
             raw-y (.to-numpy (get df self.params-y))
-
-            ;transform (fn [array mask trafo] 
-            ;            (let [masked-array (get array (, (slice None) mask))
-            ;                  trafo-array (.fit-transform trafo masked-array)]
-            ;              (setv (get array (, (slice None) mask)) trafo-array)
-            ;              array))
-            ;trafo-x (if (any self.trafo-mask-x)
-            ;            (transform raw-x self.trafo-mask-x self.x-trafo)
-            ;            raw-x)
-            ;trafo-y (if (any self.trafo-mask-y)
-            ;            (transform raw-y self.trafo-mask-y self.y-trafo)
-            ;            raw-y)
-            ;data-x (.fit-transform self.x-scaler trafo-x)
-            ;data-y (.fit-transform self.y-scaler trafo-y)
 
             trafo-x (if (and (any self.trafo-mask-x) self.lambdas-x)
                         (. (np.array (lfor (, l m x)
