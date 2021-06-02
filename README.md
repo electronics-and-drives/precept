@@ -41,7 +41,8 @@ With this the `precept` API as well as the two CLIs `pct` (for training) and
 ## CLI
 
 `precept` comes with CLIs for both training and inference based on a `.yml`
-configuration files. For more information about all options see the help option.
+configuration files. For more information about all options see the 
+corresponding help.
 
 ```sh
 $ pct --help
