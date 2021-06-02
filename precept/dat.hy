@@ -22,6 +22,17 @@
 (require [hy.contrib.walk [let]])
 (require [hy.contrib.loop [loop]])
 
+(defn _scl [x &optional [a 0.0] [b 1.0]]
+f"Feature normalization (scaling)
+Takes a 1D vector and interval [a,b] and scales it according to:
+
+             ⎛  x-min(x)   ⎞  
+  x' = (b-a)∙⎜―――――――――――――⎟+a
+             ⎝max(x)-min(x)⎠  
+
+Returns the normalzied vector x'∈ [a,b]
+"
+  (+ (* (- b a) (/ (- x (np.min x)) (- (np.max x) (np.min x)))) a))
 
 (defn _bct [y &optional [λ 0.2]]
 f"Box-Cox Transformation
@@ -116,7 +127,7 @@ Returns the inverse transformed scalar or vector.
           self.min-x        (list (repeat -Inf self.num-x))
           self.max-x        (list (repeat Inf self.num-x))
           self.min-y        (list (repeat -Inf self.num-y))
-          self.max-y        (list (repeat Inf self.num-k)))
+          self.max-y        (list (repeat Inf self.num-y)))
 
     ;; Converting the column names based trafo mask to a bit mask
     ;; for accessing a np array instead of a data frame
