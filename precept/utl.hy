@@ -1,5 +1,9 @@
 (import [numpy :as np])
 
+(require [hy.contrib.walk [let]])
+(require [hy.contrib.loop [loop]])
+(require [hy.extra.anaphoric [*]])
+
 (defn scl [x &optional [a 0.0] [b 1.0]]
 f"Feature normalization (scaling)
 Takes a 1D vector and interval [a,b] and scales it according to:

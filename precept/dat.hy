@@ -15,6 +15,7 @@
 
 (require [hy.contrib.walk [let]])
 (require [hy.contrib.loop [loop]])
+(require [hy.extra.anaphoric [*]])
 
 (defclass PreceptDataModule [LightningDataModule]
   (defn __init__ [self ^str  data-path 

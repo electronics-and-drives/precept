@@ -11,6 +11,7 @@
 
 (require [hy.contrib.walk [let]])
 (require [hy.contrib.loop [loop]])
+(require [hy.extra.anaphoric [*]])
 
 (defclass PreceptApproximator []
   (defn __init__ [self model 

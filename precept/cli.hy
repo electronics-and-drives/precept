@@ -12,6 +12,7 @@
 
 (require [hy.contrib.walk [let]])
 (require [hy.contrib.loop [loop]])
+(require [hy.extra.anaphoric [*]])
 
 (setv yaml.Dumper.ignore-aliases (fn [&rest args] True))
 
