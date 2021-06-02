@@ -75,7 +75,7 @@
         (-> model-ckpt 
             (.to-torchscript :method "trace" 
                              :example-inputs (torch.rand 1 (get model-data "num_x")))
-            (.save (.format "{}/{}-trace.pt" model-path device-name)))
+            (.save (.format "{}/{}-model.pt" model-path device-name)))
         (-> model-ckpt 
             (.state-dict) 
-            (torch.save (.format "{}/{}-trace.ckpt" model-path device-name)))))))
+            (torch.save (.format "{}/{}-model.ckpt" model-path device-name)))))))
