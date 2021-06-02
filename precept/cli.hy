@@ -4,6 +4,7 @@
 ;(import dill)
 (import yaml)
 (import torch)
+(import [numpy :as np])
 
 (import [pytorch-lightning.utilities.cli [LightningCLI]])
 (import [jsonargparse.typing [Path_fr Path_dw]])
@@ -12,6 +13,8 @@
 
 (require [hy.contrib.walk [let]])
 (require [hy.contrib.loop [loop]])
+
+(setv yaml.Dumper.ignore-aliases (fn [&rest args] True))
 
 (defclass PreceptCLI [LightningCLI]
   (defn add-arguments-to-parser [self parser]
@@ -59,20 +62,18 @@
           ;              "scale_y"   self.datamodule.y-scaler } 
           
           model-file  (.format "{}/{}-model.yml" model-path device-name)
-          model-data  { "num_x"     (get self.config "model" "num_x")
-                        "num_y"     (get self.config "model" "num_y")
-                        "params_x"  (get self.config "data" "params_x")
-                        "params_y"  (get self.config "data" "params_y")
-                        "mask_x"    (get self.config "data" "trafo_mask_x")
-                        "mask_y"    (get self.config "data" "trafo_mask_y")
-                        "min_x"     (get self.config "data" "min_x")
-                        "max_x"     (get self.config "data" "max_x")
-                        "min_y"     (get self.config "data" "min_y")
-                        "max_y"     (get self.config "data" "max_y")
-                        "lambdas_x" (get self.config "data" "lambdas_x")
-                        "lambdas_y" (get self.config "data" "lambdas_y")
-                      } 
-          ]
+          model-data  { "num_x"     self.datamodule.num-x
+                        "num_y"     self.datamodule.num-y
+                        "params_x"  self.datamodule.params-x
+                        "params_y"  self.datamodule.params-y
+                        "mask_x"    self.datamodule.mask-x
+                        "mask_y"    self.datamodule.mask-x
+                        "min_x"     (.tolist self.datamodule.min-x)
+                        "max_x"     (.tolist self.datamodule.max-x)
+                        "min_y"     (.tolist self.datamodule.min-y)
+                        "max_y"     (.tolist self.datamodule.max-y)
+                        "lambdas_x" self.datamodule.lambdas-x
+                        "lambdas_y" self.datamodule.lambdas-y } ]
 
       (.eval model-ckpt)
       (.freeze model-ckpt)
@@ -83,8 +84,8 @@
 
       (with [yml-file (open model-file "w+")]
         (yaml.dump model-data yml-file 
-                   :allow-unicode True 
-                   :default-flow-style False))
+                   ;:default-flow-style False
+                   :allow-unicode True ))
 
       (if (get self.config "serialize")
         (-> model-ckpt 
