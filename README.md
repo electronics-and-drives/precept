@@ -111,7 +111,9 @@ dictionary to all the models that should be served.
 host: <string, default = localhost> # IP or hostname 
 port: <int, default = '5000'>       # Port
 models:
-    <model-name>: <string> # Path to <name>-model.bin
+    <model-name>: 
+        model_path:  <string> # Path to <name>-model.bin
+        config_path: <string> # Path to <name>-model.yaml
     ...
 ```
 
