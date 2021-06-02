@@ -1,6 +1,6 @@
 (import [numpy :as np])
 
-(defn _scl [x &optional [a 0.0] [b 1.0]]
+(defn scl [x &optional [a 0.0] [b 1.0]]
 f"Feature normalization (scaling)
 Takes a 1D vector and interval [a,b] and scales it according to:
 
@@ -12,7 +12,7 @@ Returns the normalzied vector x'∈ [a,b]
 "
   (+ (* (- b a) (/ (- x (np.min x)) (- (np.max x) (np.min x)))) a))
 
-(defn _bct [y &optional [λ 0.2]]
+(defn bct [y &optional [λ 0.2]]
 f"Box-Cox Transformation
 Takes a scalar or 1D np.array and transforms it
 according to:
@@ -30,7 +30,7 @@ Returns the transformed scalar or vector.
     (np.log y)
     (/ (- (np.power y λ) 1) λ)))
 
-(defn _cbt [y′ &optional [λ 0.2]]
+(defn cbt [y′ &optional [λ 0.2]]
 f"Inverse Box-Cox Transformation (Cox-Box)
 Takes a scalar or 1D np.array and transforms it
 according to:
@@ -48,7 +48,3 @@ Returns the inverse transformed scalar or vector.
   (if (= λ 0)
     (np.exp y′)
     (np.exp (/ (np.log (+ (* y′ λ) 1)) λ))))
-
-
-
-
