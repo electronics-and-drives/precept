@@ -111,7 +111,12 @@ Returns the inverse transformed scalar or vector.
           self.params-y     params-y
           
           self.num-x        (len self.params-x)
-          self.num-y        (len self.params-y))
+          self.num-y        (len self.params-y)
+
+          self.min-x        []
+          self.max-x        []
+          self.min-y        []
+          self.max-y        [])
 
     ;; Converting the column names based trafo mask to a bit mask
     ;; for accessing a np array instead of a data frame
