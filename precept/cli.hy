@@ -1,7 +1,6 @@
 (import [datetime [datetime]])
 (import [pathlib [Path]])
 
-;(import dill)
 (import yaml)
 (import torch)
 (import [numpy :as np])
@@ -49,18 +48,6 @@
           best-path   self.model.cb-checkpoint.best-model-path
           model-ckpt  (PreceptModule.load-from-checkpoint best-path)
 
-          ;model-file  (.format "{}/{}-model.bin" model-path device-name)
-          ;model-data  { "num_x"     (get self.config "model" "num_x")
-          ;              "num_y"     (get self.config "model" "num_y")
-          ;              "params_x"  (get self.config "data" "params_x")
-          ;              "params_y"  (get self.config "data" "params_y")
-          ;              "mask_x"    (get self.config "data" "trafo_mask_x")
-          ;              "mask_y"    (get self.config "data" "trafo_mask_y")
-          ;              "trafo_x"   self.datamodule.x-trafo 
-          ;              "trafo_y"   self.datamodule.y-trafo 
-          ;              "scale_x"   self.datamodule.x-scaler
-          ;              "scale_y"   self.datamodule.y-scaler } 
-          
           model-file  (.format "{}/{}-model.yml" model-path device-name)
           model-data  { "num_x"     self.datamodule.num-x
                         "num_y"     self.datamodule.num-y
@@ -77,10 +64,6 @@
 
       (.eval model-ckpt)
       (.freeze model-ckpt)
-      ;(setv (get model-data "model") model-ckpt)
-
-      ;(with [dill-file (open model-file "wb")]
-      ;  (dill.dump model-data dill-file))
 
       (with [yml-file (open model-file "w+")]
         (yaml.dump model-data yml-file 
@@ -94,5 +77,4 @@
             (.save (.format "{}/{}-trace.pt" model-path device-name)))
         (-> model-ckpt 
             (.state-dict) 
-            (torch.save (.format "{}/{}-trace.ckpt" model-path device-name))))
-  )))
+            (torch.save (.format "{}/{}-trace.ckpt" model-path device-name)))))))
