@@ -20,7 +20,7 @@
 (import [sklearn.model_selection._split [train_test_split]])
 (import [sklearn.utils [shuffle]])
 
-(import .util)
+(import [.utl [scl bct]])
 
 (require [hy.contrib.walk [let]])
 (require [hy.contrib.loop [loop]])
@@ -31,13 +31,13 @@
                        ^list params-y 
                        ^list trafo-mask-x 
                        ^list trafo-mask-y
+                       ^list lambdas-x
+                       ^list lambdas-y
                   &optional ^int   [batch-size 2000]
                             ^float [test-split 0.2]
                             ^int   [num-workers (-> mp (.cpu-count) (/ 2) (int) (max 1))]
                             ^int   [rng-seed 666]
-                            ^float [sample-ratio 0.75]
-                            ^list  [lambdas-x [0.2]]
-                            ^list  [lambdas-y [0.2]]]
+                            ^float [sample-ratio 0.75] ]
 
     f"Precept Operating Point Data Module
     Mandatory Args:
@@ -83,21 +83,25 @@
 
     ;; Converting the column names based trafo mask to a bit mask
     ;; for accessing a np array instead of a data frame
-    (setv self.trafo-mask-x (list (map (fn [mask] (in mask trafo-mask-x)) 
+    (setv self.mask-x trafo-mask-x
+          self.mask-y trafo-mask-y
+          self.trafo-mask-x (list (map (fn [param] (in param trafo-mask-x)) 
                                        params-x))
-          self.trafo-mask-y (list (map (fn [mask] (in mask trafo-mask-y)) 
+          self.trafo-mask-y (list (map (fn [param] (in param trafo-mask-y)) 
                                        params-y)))
 
     ;; Check if mask and lambdas line up, if they don't take the first from
     ;; the lambdas list and repeat it as many times as necessary
-    (setv self.lambdas-x    (if (or (= (len trafo-mask-x) (len lambdas-x)) 
-                                    (not lambdas-x))
-                                lambdas-x 
-                                (repeat (first lambdas-x) (len trafo-mask-x)))
-          self.lambdas-y    (if (or (= (len trafo-mask-y) (len lambdas-y)) 
-                                    (not lambdas-y))
-                                lambdas-y 
-                                (repeat (first lambdas-y) (len trafo-mask-y))))
+    (setv self.lambdas-x    (list (map (fn [param]
+                                          (if (and (in param trafo-mask-x) lambdas-x)
+                                              (get lambdas-x (trafo-mask-x.index param))
+                                              False))
+                                       params-x))
+          self.lambdas-y    (list (map (fn [param]
+                                          (if (and (in param trafo-mask-y) lambdas-y)
+                                              (get lambdas-y (trafo-mask-y.index param))
+                                              False))
+                                       params-y)))
 
     ;(setv self.x-trafo      (QuantileTransformer :random-state self.rng-seed
     ;                                             :output-distribution "normal")
@@ -151,7 +155,7 @@
 
             sdf (get self.data-frame sat-mask (slice None))
             ;sdf-weights (minmax-scale (- (sp.stats.zscore sdf.id.values)))
-            sdf-weights (utl.scl (- (sp.stats.zscore sdf.id.values)))
+            sdf-weights (scl (- (sp.stats.zscore sdf.id.values)))
             sat-samp (.sample sdf :n (int (* num-samples self.sample-ratio))
                                   :weights sdf-weights
                                   :replace False 
@@ -159,13 +163,13 @@
 
             tdf (get self.data-frame (~ sat-mask) (slice None))
             ;tdf-weights (minmax-scale (- (sp.stats.zscore tdf.id.values)))
-            sdf-weights (utl.scl (- (sp.stats.zscore tdf.id.values)))
+            tdf-weights (scl (- (sp.stats.zscore tdf.id.values)))
             tri-samp (.sample tdf :n (int (* num-samples (- 1.0 self.sample-ratio)))
                             :weights tdf-weights
                             :replace False 
                             :random-state self.rng-seed )
 
-            df (shuffle (pd.concat [sat-samp tri-samp] :ignore-index True))
+            df (.sample (pd.concat [sat-samp tri-samp] :ignore-index True) :frac 1)
 
             raw-x (.to-numpy (get df self.params-x))
             raw-y (.to-numpy (get df self.params-y))
@@ -189,7 +193,7 @@
                                            (zip self.lambdas-x
                                                 self.trafo-mask-x
                                                 raw-x.T)
-                                           (if m (utl.bct x l) x))) 
+                                           (if m (bct x l) x))) 
                            T)
                         raw-x)
 
@@ -198,12 +202,12 @@
                                            (zip self.lambdas-y
                                                 self.trafo-mask-y
                                                 raw-y.T) 
-                                           (if m (utl.bct y l) y) )) 
+                                           (if m (bct y l) y) )) 
                            T)
                         raw-y)
 
-            data-x (np.apply-along-axis utl.scl 0 trafo-x)
-            data-y (np.apply-along-axis utl.scl 0 trafo-y)
+            data-x (np.apply-along-axis scl 0 trafo-x)
+            data-y (np.apply-along-axis scl 0 trafo-y)
 
             (, train-x
                valid-x
@@ -219,11 +223,15 @@
               self.valid-set (TensorDataset (torch.Tensor valid-x) 
                                             (torch.Tensor valid-y)))
 
+        (setv self.min-x (np.min trafo-x 0)
+              self.max-x (np.max trafo-x 0)
+              self.min-y (np.min trafo-y 0)
+              self.max-y (np.max trafo-y 0))
+
         (setv self.dims (-> self.train-set (get 0) (get 0) (. shape)))))
 
-    ;(if (or (= stage "test") (is stage None))
-    ;  pass)
-  )
+    (if (or (= stage "test") (is stage None))
+      pass))
 
   (defn train-dataloader [self]
     (DataLoader self.train-set :batch-size self.batch-size 
@@ -235,6 +243,5 @@
                                :num-workers self.num-workers 
                                :pin-memory True))
 
-  ;(defn test-dataloader [self]
-  ;  pass)
-)
+  (defn test-dataloader [self]
+    pass))
