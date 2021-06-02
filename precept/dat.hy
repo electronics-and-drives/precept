@@ -33,7 +33,6 @@
 
     f"Precept Operating Point Data Module
     Mandatory Args:
-    ---------------
       data_path:    Path to HDF5 database
       params_x:     List of input parameters
       params_y:     List of output parameters
@@ -41,7 +40,6 @@
       trafo_mask_y: output parameters that will be transformed
 
     Optional Args:
-    --------------
       batch_size:   default = 2000
       test_split:   split ratio between training and test data (default = 0.2)
       num_workers:  number of cpu cores for loading data (default = 6)
