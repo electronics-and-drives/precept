@@ -1,4 +1,5 @@
-(import dill)
+(import yaml)
+(import torch)
 (import [pandas :as pd])
 (import [typing [Any Dict Optional Type Union]])
 (import [jsonargparse [ArgumentParser ActionConfigFile]])
@@ -8,6 +9,7 @@
 (require [hy.extra.anaphoric [*]])
 
 (import [.inf [PreceptApproximator]])
+(import [.mod [PreceptModule]])
 
 (defclass PreceptSRV []
   (defn __init__ [self]
@@ -37,12 +39,20 @@
       (let [models (vars self.args.models)]
         (dfor mid models
           [ mid 
-            (with [file (open (get models mid) "rb")]
-              (-> file 
-                  (dill.load)
-                  (unpack-mapping)
-                  (PreceptApproximator))) ])))
+            (let [config-path (. (get models mid) config_path)
+                  model-path (. (get models mid) model_path)
 
+                  config (with [file (open config-path "r")]
+                           (yaml.load file :Loader yaml.FullLoader))
+
+                  _ (setv (get config "model")
+                          (cond [(.endswith model-path ".pt")
+                                 (torch.jit.load model-path)]
+                                [(.endswith model-path ".ckpt")
+                                 (PreceptModule.load-from-checkpoint model-path) ]
+                                [True
+                                 (raise (IOError "Wrong filetype, has to be (.ckpt) or (.pt)"))]))]
+              (-> config (unpack-mapping) (PreceptApproximator)))])))
     (, self.args.host self.args.port))
 
   (defn predict [self ^dict inputs]
