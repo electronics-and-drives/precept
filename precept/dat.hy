@@ -88,14 +88,32 @@
       (setv self.data-frame 
         (cond [(in file-type [".h5" ".hdf" ".hdf5"])
                (with [hdf-file (h5.File self.data-path "r")]
-                (let [column-names (->> "columns" (get hdf-file) 
+                  (let [ groups (list (.keys hdf-file))
+                         column-names (cond [(in "columns" groups)
+                                             (->> "columns" (get hdf-file) 
                                                   (map (fn [c] (.decode c "UTF-8"))) 
-                                                  (list))
-                      data-matrix (->> "data" (get hdf-file) 
-                                              (np.array) 
-                                              (np.transpose))
-                      df (pd.DataFrame data-matrix :columns column-names)]
-                  (.dropna df)))]
+                                                  (list)) ]
+                                            [(-> (+ self.params-x self.params-y)
+                                                 (set) (.issubset groups))
+                                             groups ]
+                                            [True
+                                             (raise (TypeError 
+                                                (+ "Couldn't find Group `columns`"
+                                                   "or all parameter names." ))) ])
+
+                         data-matrix (-> (cond [(in "columns" groups)
+                                                (get hdf-file "data") ]
+                                               [(-> (+ self.params-x self.params-y)
+                                                 (set) (.issubset groups))
+                                                (lfor c column-names (get hdf-file c)) ]
+                                               [True
+                                                (raise (TypeError 
+                                                 (+ "Couldn't find Group `data`"
+                                                    "or all parameter names." )))])
+                                         (np.array)
+                                         (np.transpose))
+                         df (pd.DataFrame data-matrix :columns column-names)]
+                    (.dropna df)))]
               [(in file-type [".csv"])
                (-> self.data-path
                    (pd.read-csv)
