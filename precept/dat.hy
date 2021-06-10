@@ -113,8 +113,7 @@
                                          (np.array)
                                          (np.transpose))
                          df (pd.DataFrame data-matrix :columns column-names)]
-                    (.dropna df))
-               )]
+                    (.dropna df)))]
               [(in file-type [".csv"])
                (-> self.data-path
                    (pd.read-csv)
