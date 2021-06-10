@@ -114,14 +114,6 @@
                                          (np.transpose))
                          df (pd.DataFrame data-matrix :columns column-names)]
                     (.dropna df))
-                ;(let [column-names (->> "columns" (get hdf-file) 
-                ;                                  (map (fn [c] (.decode c "UTF-8"))) 
-                ;                                  (list))
-                ;      data-matrix (->> "data" (get hdf-file) 
-                ;                              (np.array) 
-                ;                              (np.transpose))
-                ;      df (pd.DataFrame data-matrix :columns column-names)]
-                ;  (.dropna df))
                )]
               [(in file-type [".csv"])
                (-> self.data-path
