@@ -166,6 +166,7 @@ import precept as pct
     - [X] Implement model inference based on Flask
     - [ ] Trochscript C++ interface
 - [X] CSV Data support
+- [ ] Don't hardcode CSV Format
 - [ ] TSV, ASCII, PSF, nutmeg, nutbin etc... support
 - [ ] Alternative scaling and transforming for better use with serialized models
 - [X] Get rid of hard coded processing for additional parameter calculation
