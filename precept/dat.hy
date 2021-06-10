@@ -88,14 +88,22 @@
       (setv self.data-frame 
         (cond [(in file-type [".h5" ".hdf" ".hdf5"])
                (with [hdf-file (h5.File self.data-path "r")]
-                (let [column-names (->> "columns" (get hdf-file) 
-                                                  (map (fn [c] (.decode c "UTF-8"))) 
-                                                  (list))
-                      data-matrix (->> "data" (get hdf-file) 
-                                              (np.array) 
-                                              (np.transpose))
-                      df (pd.DataFrame data-matrix :columns column-names)]
-                  (.dropna df)))]
+                  (let [ column-names (list (.keys hdf-file)) 
+                         data-matrix (-> (lfor c column-names (get hdf-file c))
+                                         (np.array)
+                                         (np.transpose))
+                         df (pd.DataFrame data-matrix :columns column-names)]
+
+                    (.dropna df))
+                ;(let [column-names (->> "columns" (get hdf-file) 
+                ;                                  (map (fn [c] (.decode c "UTF-8"))) 
+                ;                                  (list))
+                ;      data-matrix (->> "data" (get hdf-file) 
+                ;                              (np.array) 
+                ;                              (np.transpose))
+                ;      df (pd.DataFrame data-matrix :columns column-names)]
+                ;  (.dropna df))
+               )]
               [(in file-type [".csv"])
                (-> self.data-path
                    (pd.read-csv)
