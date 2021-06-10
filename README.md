@@ -89,16 +89,49 @@ Additional documentation for Lightning specific configuration can be found in th
 
 #### Training Data
 
-The data specified by the `data_path` field is expected to be an HDF and
-structured like so:
+The preferred file format for training data at this point is
+[HDF5](https://www.hdfgroup.org/solutions/hdf5/), for which currently two
+different formattings are supported. The file should either have two fields,
+one named `columns` containing a list of strings, corresponding to the
+operating point parameter names and another field named `data` containing the
+data matrix.
 
 ```python
 In  [1]: list(map(lambda k: f"{k}: {hdf_file[k].shape}", hdf_file.keys()))
 Out [1]: ['columns: (18,)', 'data: (18, 16105100)']
 ```
 
-Where `columns` are the headers for what is stored in `data`. These **must**
-align with the `params_x` and `params_y` specification in the given
+Alternatively, if storing / reading strings is not wanted or possible (command
+line utilities, octave ...) the file may be formatted such that each parameter
+names it's own group in the file.
+
+```python
+In [2]: list(map(lambda k: f"{k}: {f[k].shape}", f.keys()))
+Out[2]:
+['L: (14641000,)',
+ 'Vbs: (14641000,)',
+ 'Vds: (14641000,)',
+ 'Vgs: (14641000,)',
+ 'W: (14641000,)',
+ 'cdb: (14641000,)',
+ 'cds: (14641000,)',
+ 'cgb: (14641000,)',
+ 'cgd: (14641000,)',
+ 'cgs: (14641000,)',
+ 'csb: (14641000,)',
+ 'fug: (14641000,)',
+ 'gbd: (14641000,)',
+ 'gbs: (14641000,)',
+ 'gds: (14641000,)',
+ 'gm: (14641000,)',
+ 'gmbs: (14641000,)',
+ 'id: (14641000,)',
+ 'vdsat: (14641000,)',
+ 'vth: (14641000,)']
+```
+
+Where `columns` or group names are the headers for what is stored. These
+**must** align with the `params_x` and `params_y` specification in the given
 `train.yml`.
 
 If you need some toy data, check out 
