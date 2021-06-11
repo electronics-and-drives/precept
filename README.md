@@ -157,13 +157,6 @@ models:
 Start the [flask](https://flask.palletsprojects.com/) server with the `prc`
 command and a configuration like the one shown in `examples/infer.yml`.
 
-#### Compiled
-
-An alternative interence method for
-[TorchScript](https://pytorch.org/docs/stable/jit.html) models is currently in
-the works, but still in very early development. It can be found in the
-[precppt](https://github.com/electronics-and-drives/precppt) repository.
-
 ```sh
 $ prc --config ./examples/infer.yml
 
@@ -186,6 +179,13 @@ $ curl -X POST -H "Content-Type: application/json" \
 The values for each parameter **must** be in a list, even if it's just one and
 there **must** be the same number of values for each parameter and the
 parameters **must** have been specified in the `params_x` previously.
+
+#### Compiled
+
+An alternative interence method for
+[TorchScript](https://pytorch.org/docs/stable/jit.html) models is currently in
+the works, but still in very early development. It can be found in the
+[precppt](https://github.com/electronics-and-drives/precppt) repository.
 
 ## API
 
