@@ -139,6 +139,8 @@ If you need some toy data, check out
 
 ### Inference
 
+#### Flask
+
 The inference interface `prc` is much simpler. It takes as input only a
 dictionary to all the models that should be served. 
 
@@ -154,6 +156,13 @@ models:
 
 Start the [flask](https://flask.palletsprojects.com/) server with the `prc`
 command and a configuration like the one shown in `examples/infer.yml`.
+
+#### Compiled
+
+An alternative interence method for
+[TorchScript](https://pytorch.org/docs/stable/jit.html) models is currently in
+the works, but still in very early development. It can be found in the
+[precppt](https://github.com/electronics-and-drives/precppt) repository.
 
 ```sh
 $ prc --config ./examples/infer.yml
