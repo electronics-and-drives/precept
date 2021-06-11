@@ -1,7 +1,7 @@
 models:
-    ptmn90: 
-        model_path:     /tmp/precept/op-ptmn90-20210602-160224/ptmn90-model.pt
-        config_path:    /tmp/precept/op-ptmn90-20210602-160224/ptmn90-model.yml
-    ptmp90: 
-        model_path:     /tmp/precept/op-ptmp90-20210602-154205/ptmp90-model.pt
-        config_path:    /tmp/precept/op-ptmp90-20210602-154205/ptmp90-model.yml
+    model-id: 
+        model_path:     /path/to/model.pt
+        config_path:    /path/to/config.yml
+    another-model-id: 
+        model_path:     ../some/other/relative/path/to/model.pt
+        config_path:    ./yet/another/path/to/config.yml

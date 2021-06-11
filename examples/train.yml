@@ -18,18 +18,38 @@ model:
   beta_1: 0.9
   beta_2: 0.999
 data:
-  data_path: ../data/90nm_bulk.h5
-  params_x: [ W, L, Vgs, Vds, Vbs ]
-  params_y: [ vth, vdsat, id, gm, gds , gmbs, fug
-            , cgd, cgb, cgs, cds, csb, cdb ]
+  data_path: /path/to/data.h5
+  params_x:  
+    - W
+    - L
+    - Vgs
+    - Vds
+    - Vbs
+  params_y: 
+    - vth
+    - vdsat
+    - id
+    - gm
+    - gds
+    - fug
   trafo_mask_x: []
-  trafo_mask_y: [ id, gm, gmbs, gds, fug ]
+  trafo_mask_y: 
+    - id
+    - gm
+    - gmbs
+    - gds
+    - fug
   lambdas_x: []
-  lambdas_y: [ 0.2, 0.2, 0.2, 0.2, 0.2 ]
+  lambdas_y: 
+    - 0.2
+    - 0.2
+    - 0.2
+    - 0.2
+    - 0.2
   batch_size: 2000
   test_split: 0.2
   num_workers: 6
   rng_seed: 666
 serialize: true
-device_name: ptmn90
+device_name: nmos1v
 model_prefix: /tmp/precept
