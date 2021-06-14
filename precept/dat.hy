@@ -127,27 +127,28 @@
 
   (defn setup [self &optional [stage None]]
     (if (or (= stage "fit") (is stage None))
-      (let [sat-mask (. (& (>= self.data-frame.Vds (- self.data-frame.Vgs self.data-frame.vth))
-                           (> self.data-frame.Vgs self.data-frame.vth))
-                      values)
+      (let [;sat-mask (. (& (>= self.data-frame.Vds (- self.data-frame.Vgs self.data-frame.vth))
+            ;               (> self.data-frame.Vgs self.data-frame.vth))
+            ;          values)
 
-            num-samples (-> self.data-frame (. shape) (first) (/ 4) (int))
+            ;num-samples (-> self.data-frame (. shape) (first) (/ 4) (int))
 
-            sdf (get self.data-frame sat-mask (slice None))
-            sdf-weights (scl (- (zscore sdf.id.values)))
-            sat-samp (.sample sdf :n (int (* num-samples self.sample-ratio))
-                                  :weights sdf-weights
-                                  :replace False 
-                                  :random-state self.rng-seed )
+            ;sdf (get self.data-frame sat-mask (slice None))
+            ;sdf-weights (scl (- (zscore sdf.id.values)))
+            ;sat-samp (.sample sdf :n (int (* num-samples self.sample-ratio))
+            ;                      :weights sdf-weights
+            ;                      :replace False 
+            ;                      :random-state self.rng-seed )
 
-            tdf (get self.data-frame (~ sat-mask) (slice None))
-            tdf-weights (scl (- (zscore tdf.id.values)))
-            tri-samp (.sample tdf :n (int (* num-samples (- 1.0 self.sample-ratio)))
-                            :weights tdf-weights
-                            :replace False 
-                            :random-state self.rng-seed )
+            ;tdf (get self.data-frame (~ sat-mask) (slice None))
+            ;tdf-weights (scl (- (zscore tdf.id.values)))
+            ;tri-samp (.sample tdf :n (int (* num-samples (- 1.0 self.sample-ratio)))
+            ;                :weights tdf-weights
+            ;                :replace False 
+            ;                :random-state self.rng-seed )
 
-            df (.sample (pd.concat [sat-samp tri-samp] :ignore-index True) :frac 1)
+            ;df (.sample (pd.concat [sat-samp tri-samp] :ignore-index True) :frac 1)
+            df (.sample self.data-frame :frac 1)
 
             raw-x (.to-numpy (get df self.params-x))
             raw-y (.to-numpy (get df self.params-y))
@@ -176,7 +177,7 @@
                                                train-idx 
                                                :assume-unique True 
                                                :invert True))
-                                              
+
             train-x (get data-x train-idx)
             train-y (get data-y train-idx)
             valid-x (get data-x valid-idx)
