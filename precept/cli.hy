@@ -4,9 +4,10 @@
 (import yaml)
 (import torch)
 (import [numpy :as np])
+(import [pandas :as pd])
 
 (import [pytorch-lightning.utilities.cli [LightningCLI]])
-(import [jsonargparse.typing [Path_fr Path_dw]])
+(import [jsonargparse.typing [Path-fr Path-dw]])
 
 (import [.mod [PreceptModule]])
 
@@ -18,7 +19,13 @@
 
 (defclass PreceptCLI [LightningCLI]
   (defn add-arguments-to-parser [self parser]
-    (let [num-params (fn [ps] (len ps))]
+    (let [num-params (fn [ps] (len ps))
+          ts-dir (fn [pf dn] 
+                  (let[ts (-> datetime
+                              (.now) 
+                              (.strftime "%Y%m%d-%H%M%S"))]
+                    (.format "{}/op-{}-{}" pf dn ts)))]
+
       (parser.add-argument "--serialize"    :default True)
       (parser.add-argument "--device_name"  :default "mos")
       (parser.add-argument "--model_prefix" :default "/tmp/precept")
@@ -28,12 +35,9 @@
       (parser.link-arguments "data.params_y" "model.num_y"
                              :compute-fn num-params)
 
-      (parser.link-arguments ["model_prefix" "device_name"] "trainer.default_root_dir"
-                              :compute-fn (fn [pf dn] 
-                                            (let[ts (-> datetime
-                                                        (.now) 
-                                                        (.strftime "%Y%m%d-%H%M%S"))]
-                                              (.format "{}/op-{}-{}" pf dn ts))))
+      (parser.link-arguments ["model_prefix" "device_name"] 
+                             "trainer.default_root_dir"
+                             :compute-fn ts-dir)
 
       (parser.link-arguments "trainer.default_root_dir" "model.model_path")))
 

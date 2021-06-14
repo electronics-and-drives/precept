@@ -3,23 +3,23 @@
 (import [h5py :as h5])
 (import [multiprocess :as mp])
 
-(import [pathlib [Path]])
 (import [scipy.stats [zscore]])
+
+(import [pathlib [Path]])
 
 (import torch)
 (import [torch.utils.data [random_split TensorDataset DataLoader]])
 
 (import [pytorch-lightning [LightningDataModule]])
 
-(import [.utl [scl bct]])
+(import [.utl [bct cbt scl]])
 
 (require [hy.contrib.walk [let]])
 (require [hy.contrib.loop [loop]])
 (require [hy.extra.anaphoric [*]])
 
 (defclass PreceptDataModule [LightningDataModule]
-  (defn __init__ [self ^str  data-path 
-                       ^list params-x 
+  (defn __init__ [self ^list params-x 
                        ^list params-y 
                        ^list trafo-mask-x 
                        ^list trafo-mask-y
@@ -51,7 +51,7 @@
 
     (.__init__ (super))
 
-    (setv self.data-path    data-path
+    (setv ;self.data-frame   data-frame
           self.batch-size   batch-size
           self.test-split   test-split
 
@@ -79,49 +79,12 @@
                                        params-y)))
 
     (setv self.lambdas-x lambdas-x
-          self.lambdas-y lambdas-y))
+          self.lambdas-y lambdas-y)
+
+    (setv self.data-frame (pd.DataFrame)))
 
   (defn prepare-data [self]
-    (let [file-type (. (Path self.data-path) suffix) ]
-      (setv self.data-frame 
-        (cond [(in file-type [".h5" ".hdf" ".hdf5"])
-               (with [hdf-file (h5.File self.data-path "r")]
-                  (let [ groups (list (.keys hdf-file))
-                         column-names (cond [(in "columns" groups)
-                                             (->> "columns" (get hdf-file) 
-                                                  (map (fn [c] (.decode c "UTF-8"))) 
-                                                  (list)) ]
-                                            [(-> (+ self.params-x self.params-y)
-                                                 (set) (.issubset groups))
-                                             groups ]
-                                            [True
-                                             (raise (TypeError 
-                                                (+ "Couldn't find Group `columns`"
-                                                   "or all parameter names." ))) ])
-
-                         data-matrix (-> (cond [(in "columns" groups)
-                                                (get hdf-file "data") ]
-                                               [(-> (+ self.params-x self.params-y)
-                                                 (set) (.issubset groups))
-                                                (lfor c column-names (get hdf-file c)) ]
-                                               [True
-                                                (raise (TypeError 
-                                                 (+ "Couldn't find Group `data`"
-                                                    "or all parameter names." )))])
-                                         (np.array)
-                                         (np.transpose))
-                         df (pd.DataFrame data-matrix :columns column-names)]
-                    (.dropna df)))]
-              [(in file-type [".csv"])
-               (-> self.data-path
-                   (pd.read-csv)
-                   (.dropna df))]
-              [(in file-type [".tsv"])
-               (-> self.data-path
-                   (pd.read-csv :delim_whitespace True)
-                   (.dropna df))]
-              [True (raise (TypeError (.format "File type {} not Supported!" file-type)))]))
-      (setv self.dims self.data-frame.shape)))
+    (setv self.dims self.data-frame.shape))
 
   (defn setup [self &optional [stage None]]
     (if (or (= stage "fit") (is stage None))
@@ -187,3 +150,86 @@
 
   (defn test-dataloader [self]
     pass))
+
+(defclass PreceptDataFrameModule [PreceptDataModule]
+  (defn __init__ [self ^pd.core.frame.DataFrame  data-frame
+                       ^list params-x 
+                       ^list params-y 
+                       ^list trafo-mask-x 
+                       ^list trafo-mask-y
+                       ^list lambdas-x
+                       ^list lambdas-y
+                  &optional ^int   [batch-size 2000]
+                            ^float [test-split 0.2]
+                            ^int   [num-workers (-> mp (.cpu-count) 
+                                                       (/ 2) 
+                                                       (int) 
+                                                       (max 1))]
+                            ^int   [rng-seed 666]]
+    (.__init__ (super) params-x params-y trafo-mask-x trafo-mask-y 
+                       lambdas-x lambdas-y
+                       :batch-size batch-size :test-split test-split 
+                       :num-workers num-workers :rng-seed rng-seed)
+    (setv self.data-frame data-frame)))
+
+(defclass PreceptDataBaseModule [PreceptDataModule]
+  (defn __init__ [self ^str  data-path
+                       ^list params-x 
+                       ^list params-y 
+                       ^list trafo-mask-x 
+                       ^list trafo-mask-y
+                       ^list lambdas-x
+                       ^list lambdas-y
+                  &optional ^int   [batch-size 2000]
+                            ^float [test-split 0.2]
+                            ^int   [num-workers (-> mp (.cpu-count) 
+                                                       (/ 2) 
+                                                       (int) 
+                                                       (max 1))]
+                            ^int   [rng-seed 666]]
+    (.__init__ (super) params-x params-y trafo-mask-x trafo-mask-y 
+                       lambdas-x lambdas-y
+                       :batch-size batch-size :test-split test-split 
+                       :num-workers num-workers :rng-seed rng-seed)
+    (setv self.data-path data-path))
+
+  (defn prepare-data [self]
+    (setv self.data-frame
+          (let [file-type (. (Path self.data-path) suffix)]
+            (cond [(in file-type [".h5" ".hdf" ".hdf5"])
+                   (with [hdf-file (h5.File self.data-path "r")]
+                      (let [ groups (list (.keys hdf-file))
+                             column-names (cond [(in "columns" groups)
+                                                 (->> "columns" (get hdf-file) 
+                                                      (map (fn [c] (.decode c "UTF-8"))) 
+                                                      (list)) ]
+                                                [(-> (+ self.params-x self.params-y)
+                                                     (set) (.issubset groups))
+                                                 groups ]
+                                                [True
+                                                 (raise (TypeError 
+                                                    (+ "Couldn't find Group `columns`"
+                                                       "or all parameter names." ))) ])
+                             data-matrix (-> (cond [(in "columns" groups)
+                                                    (get hdf-file "data") ]
+                                                   [(-> (+ self.params-x self.params-y)
+                                                     (set) (.issubset groups))
+                                                    (lfor c column-names (get hdf-file c)) ]
+                                                   [True
+                                                    (raise (TypeError 
+                                                     (+ "Couldn't find Group `data`"
+                                                        "or all parameter names." )))])
+                                             (np.array)
+                                             (np.transpose))
+                             df (pd.DataFrame data-matrix :columns column-names)]
+                        (.dropna df)))]
+                  [(in file-type [".csv"])
+                   (-> self.data-path
+                       (pd.read-csv)
+                       (.dropna df))]
+                  [(in file-type [".tsv"])
+                   (-> self.data-path
+                       (pd.read-csv :delim_whitespace True)
+                       (.dropna df))]
+                  [True (raise (TypeError (.format "File type {} not Supported!" file-type)))])))
+    (setv self.dims self.data-frame.shape)))

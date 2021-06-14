@@ -7,7 +7,7 @@ import warnings
 from flask import Flask, request, abort
 
 from .mod import PreceptModule
-from .dat import PreceptDataModule
+from .dat import PreceptDataBaseModule
 from .cli import PreceptCLI
 from .srv import PreceptSRV
 
@@ -20,7 +20,7 @@ under certain conditions.
 
 def pct():
     print(GPL_NOTICE)
-    cli = PreceptCLI(PreceptModule, PreceptDataModule)
+    cli = PreceptCLI(PreceptModule, PreceptDataBaseModule)
     return 0
 
 def prc():
