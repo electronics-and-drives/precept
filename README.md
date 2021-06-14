@@ -215,6 +215,7 @@ import precept as pct
 - [ ] Add training and inference API examples
     - [ ] Add toy models for inference examples
     - [ ] Notebooks as well
+- [ ] Deprecate transformation, should be part of manual preprocessing
 - [ ] Add better logging
 - [ ] Add manpages for CLI(1), API(8) and CFG(5)
 
