@@ -28,8 +28,7 @@
                   &optional ^int   [batch-size 2000]
                             ^float [test-split 0.2]
                             ^int   [num-workers (-> mp (.cpu-count) (/ 2) (int) (max 1))]
-                            ^int   [rng-seed 666]
-                            ^float [sample-ratio 0.75] ]
+                            ^int   [rng-seed 666]]
 
     f"Precept Operating Point Data Module
     Mandatory Args:
@@ -56,7 +55,6 @@
           self.batch-size   batch-size
           self.test-split   test-split
 
-          self.sample-ratio sample-ratio
           self.num-workers  num-workers
           self.rng-seed     rng-seed
 
@@ -127,28 +125,7 @@
 
   (defn setup [self &optional [stage None]]
     (if (or (= stage "fit") (is stage None))
-      (let [;sat-mask (. (& (>= self.data-frame.Vds (- self.data-frame.Vgs self.data-frame.vth))
-            ;               (> self.data-frame.Vgs self.data-frame.vth))
-            ;          values)
-
-            ;num-samples (-> self.data-frame (. shape) (first) (/ 4) (int))
-
-            ;sdf (get self.data-frame sat-mask (slice None))
-            ;sdf-weights (scl (- (zscore sdf.id.values)))
-            ;sat-samp (.sample sdf :n (int (* num-samples self.sample-ratio))
-            ;                      :weights sdf-weights
-            ;                      :replace False 
-            ;                      :random-state self.rng-seed )
-
-            ;tdf (get self.data-frame (~ sat-mask) (slice None))
-            ;tdf-weights (scl (- (zscore tdf.id.values)))
-            ;tri-samp (.sample tdf :n (int (* num-samples (- 1.0 self.sample-ratio)))
-            ;                :weights tdf-weights
-            ;                :replace False 
-            ;                :random-state self.rng-seed )
-
-            ;df (.sample (pd.concat [sat-samp tri-samp] :ignore-index True) :frac 1)
-            df (.sample self.data-frame :frac 1)
+      (let [df (.sample self.data-frame :frac 1)
 
             raw-x (.to-numpy (get df self.params-x))
             raw-y (.to-numpy (get df self.params-y))
