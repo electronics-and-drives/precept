@@ -218,6 +218,7 @@ soon<sup>TM</sup>
 - [ ] Deprecate transformation, should be part of manual preprocessing
 - [ ] Add better logging
 - [ ] Add manpages for CLI(1), API(8) and CFG(5)
+- [ ] Add tests
 
 ## License
 
