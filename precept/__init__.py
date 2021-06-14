@@ -7,8 +7,5 @@ for different mappings.
 
 import hy
 from .mod import PreceptModule
-from .dat import PreceptDataModule
-from .cli import PreceptCLI
+from .dat import PreceptDataFrameModule, PreceptDataBaseModule
 from .inf import PreceptApproximator
-
-#from .core import *

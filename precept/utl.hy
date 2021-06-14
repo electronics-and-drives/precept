@@ -1,4 +1,5 @@
 (import [numpy :as np])
+(import [pandas :as pd])
 
 (require [hy.contrib.walk [let]])
 (require [hy.contrib.loop [loop]])
