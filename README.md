@@ -189,14 +189,14 @@ the works, but still in very early development. It can be found in the
 
 ## API
 
+### Examples
+
+Commented API usage examples for both training and inference can be found in
+`examples/training.py` and `examples/inference.py` respectively.
+
+### Reference
+
 soon<sup>TM</sup>
-
-Examples on how to use the API will be in the `examples/` directory of
-this repository. There will be documented scripts as well as notebooks.
-
-```python
-import precept as pct
-```
 
 ## TODO
 
