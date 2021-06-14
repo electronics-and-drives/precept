@@ -9,5 +9,6 @@ import hy
 from .mod import PreceptModule
 from .dat import PreceptDataModule
 from .cli import PreceptCLI
+from .inf import PreceptApproximator
 
 #from .core import *
