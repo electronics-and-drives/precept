@@ -1,11 +1,12 @@
 import yaml
 import torch
+import pandas as pd
+import numpy as np
 from pytorch_lightning import Trainer
-from precept import PreceptModule, PreceptDataModule
+from precept import PreceptModule, PreceptDataFrameModule
 
 # File System setup
 device_name = 'example-device'
-data_path = '/tmp/precept/data/90nm_bulk_nmos.h5'
 model_path = '/tmp/precept/example'
 
 # Specify which columns in the data base are inputs and outputs
@@ -30,16 +31,19 @@ test_split = 0.2
 num_workers = 6
 rng_seed = 666
 
+# Generate some random data
+data_frame = pd.DataFrame({c: np.random.rand(42) for c in params_x + params_y})
+
 # Data Module Definition
-data = PreceptDataModule( data_path                     # Where the data is located
-                        , params_x, params_y            # Input and output columns
-                        , trafo_mask_x, trafo_mask_y    # Transformation masks
-                        , lambdas_x, lambdas_y          # Transformation parameters
-                        , batch_size = batch_size       # Batch Size for training
-                        , test_split = test_split       # How large the test split is
-                        , num_workers = num_workers     # Number of CPU cores for data loading
-                        , rng_seed = rng_seed           # Random seed
-                        , )
+data = PreceptDataFrameModule( data_frame                    # The data
+                             , params_x, params_y            # Input and output columns
+                             , trafo_mask_x, trafo_mask_y    # Transformation masks
+                             , lambdas_x, lambdas_y          # Transformation parameters
+                             , batch_size = batch_size       # Batch Size for training
+                             , test_split = test_split       # How large the test split is
+                             , num_workers = num_workers     # Number of CPU cores for data loading
+                             , rng_seed = rng_seed           # Random seed
+                             , )
 
 # Model Definition
 model = PreceptModule( num_x, num_y                     # Number of inputs and outputs
