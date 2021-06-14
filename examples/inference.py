@@ -5,7 +5,6 @@ import numpy as np
 from precept import PreceptModule, PreceptApproximator
 
 # File System setup
-device_name = 'ptmn90'
 checkpoint_path = '/tmp/precept/example/example.ckpt'
 meta_file = '/tmp/precept/example/example.yml'
 

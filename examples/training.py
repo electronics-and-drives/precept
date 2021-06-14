@@ -4,7 +4,7 @@ from pytorch_lightning import Trainer
 from precept import PreceptModule, PreceptDataModule
 
 # File System setup
-device_name = 'ptmn90'
+device_name = 'example-device'
 data_path = '/tmp/precept/data/90nm_bulk_nmos.h5'
 model_path = '/tmp/precept/example'
 
@@ -59,10 +59,10 @@ trainer = Trainer( gpus = 1                             # Number of available GP
 trainer.fit(model, data)
 
 # Save a checkpoint of the current model
-trainer.save_checkpoint(f'{model_path}/example.ckpt')
+trainer.save_checkpoint(f'{model_path}/{device_name}.ckpt')
 
 # Save Metadata for Inference
-meta_file = f'{model_path}/example.yml'
+meta_file = f'{model_path}/{device_name}.yml'
 
 meta_data = { 'num_x':      num_x
             , 'num_y':      num_y
@@ -90,4 +90,4 @@ script = model.to_torchscript( method = 'trace'
                              , example_inputs = torch.rand(1, num_x, dtype=float)
                              , )
 
-torch.jit.save(script, f'{model_path}/example.pt')
+torch.jit.save(script, f'{model_path}/{device_name}.pt')
