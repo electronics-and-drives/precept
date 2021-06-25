@@ -51,8 +51,7 @@
 
     (.__init__ (super))
 
-    (setv ;self.data-frame   data-frame
-          self.batch-size   batch-size
+    (setv self.batch-size   batch-size
           self.test-split   test-split
 
           self.num-workers  num-workers
