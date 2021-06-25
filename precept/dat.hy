@@ -26,7 +26,8 @@
                   &optional ^int   [batch-size 2000]
                             ^float [test-split 0.2]
                             ^int   [num-workers (-> mp (.cpu-count) (/ 2) (int) (max 1))]
-                            ^int   [rng-seed 666]]
+                            ^int   [rng-seed 666]
+                            ^bool  [scale True]]
 
     f"Precept Operating Point Data Module
     Mandatory Args:
@@ -35,16 +36,15 @@
       params_y:     List of output parameters
       trafo_mask_x: input parameters that will be transformed
       trafo_mask_y: output parameters that will be transformed
+      lambdas-x/y:  list of lambdas for each parameter nambed in trafo-mask-x/y,
+                    or a list with a single value, resulting in the same for all.
 
     Optional Args:
       batch_size:   default = 2000
       test_split:   split ratio between training and test data (default = 0.2)
       num_workers:  number of cpu cores for loading data (default = 6)
       rng_seed:     seed for random number generator (default = 666)
-      sample_ratio: ratio sampled from triode region vs saturation region
-                    (default = 0.75)
-      lambdas-x/y:  list of lambdas for each parameter nambed in trafo-mask-x/y,
-                    or a list with a single value, resulting in the same for all.
+      scale:        True (default) if the data should be scaled between [0;1]
     "
 
     (.__init__ (super))
@@ -100,8 +100,8 @@
                       (lfor (, idx y) (enumerate (get raw-y.T self.trafo-mask-y))
                         (bct (np.array y) (get self.lambdas-y idx)))))
 
-            data-x (np.apply-along-axis scl 0 raw-x)
-            data-y (np.apply-along-axis scl 0 raw-y)
+            data-x (if scale (np.apply-along-axis scl 0 raw-x) raw-x)
+            data-y (if scale (np.apply-along-axis scl 0 raw-y) raw-y)
 
             num-train-samples (int (* (- 1.0 self.test-split) (first data-x.shape)))
             sample-idx        (np.array (range (first data-x.shape)))
