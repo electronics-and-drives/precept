@@ -161,11 +161,13 @@
                                                        (/ 2) 
                                                        (int) 
                                                        (max 1))]
-                            ^int   [rng-seed 666]]
+                            ^int   [rng-seed 666]
+                            ^bool  [scale True]]
     (.__init__ (super) params-x params-y trafo-mask-x trafo-mask-y 
                        lambdas-x lambdas-y
                        :batch-size batch-size :test-split test-split 
-                       :num-workers num-workers :rng-seed rng-seed)
+                       :num-workers num-workers :rng-seed rng-seed
+                       :scale scale)
     (setv self.data-frame data-frame)))
 
 (defclass PreceptDataBaseModule [PreceptDataModule]
