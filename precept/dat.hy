@@ -110,8 +110,7 @@
                                         num-train-samples
                                         :replace False)
 
-            valid-idx (get sample-idx (np.in1d sample-idx 
-                                               train-idx 
+            valid-idx (get sample-idx (np.in1d sample-idx train-idx 
                                                :assume-unique True 
                                                :invert True))
 
@@ -183,11 +182,13 @@
                                                        (/ 2) 
                                                        (int) 
                                                        (max 1))]
-                            ^int   [rng-seed 666]]
+                            ^int   [rng-seed 666]
+                            ^bool  [scale True]]
     (.__init__ (super) params-x params-y trafo-mask-x trafo-mask-y 
                        lambdas-x lambdas-y
                        :batch-size batch-size :test-split test-split 
-                       :num-workers num-workers :rng-seed rng-seed)
+                       :num-workers num-workers :rng-seed rng-seed
+                       :scale scale)
     (setv self.data-path data-path))
 
   (defn prepare-data [self]
