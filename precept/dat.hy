@@ -52,6 +52,8 @@
     (setv self.batch-size   batch-size
           self.test-split   test-split
 
+          self.scale        scale
+
           self.num-workers  num-workers
           self.rng-seed     rng-seed
 
@@ -100,8 +102,8 @@
                       (lfor (, idx y) (enumerate (get raw-y.T self.trafo-mask-y))
                         (bct (np.array y) (get self.lambdas-y idx)))))
 
-            data-x (if scale (np.apply-along-axis scl 0 raw-x) raw-x)
-            data-y (if scale (np.apply-along-axis scl 0 raw-y) raw-y)
+            data-x (if self.scale (np.apply-along-axis scl 0 raw-x) raw-x)
+            data-y (if self.scale (np.apply-along-axis scl 0 raw-y) raw-y)
 
             num-train-samples (int (* (- 1.0 self.test-split) (first data-x.shape)))
             sample-idx        (np.array (range (first data-x.shape)))
