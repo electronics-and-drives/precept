@@ -3,8 +3,6 @@
 (import [h5py :as h5])
 (import [multiprocess :as mp])
 
-(import [scipy.stats [zscore]])
-
 (import [pathlib [Path]])
 
 (import torch)
