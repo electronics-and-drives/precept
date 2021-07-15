@@ -2,7 +2,6 @@
 (import [numpy :as np])
 (import [pandas :as pd])
 (import [h5py :as h5])
-;(import [multiprocess :as mp])
 
 (import [pathlib [Path]])
 
@@ -26,7 +25,6 @@
                        ^list lambdas-y
                   &optional ^int   [batch-size 2000]
                             ^float [test-split 0.2]
-                            ;^int   [num-workers (-> mp (.cpu-count) (/ 2) (int) (max 1))]
                             ^int   [num-workers (-> os (.cpu-count) (/ 2) (int) (max 1))]
                             ^int   [rng-seed 666]
                             ^bool  [scale True]]
