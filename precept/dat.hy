@@ -90,19 +90,19 @@
 
   (defn setup [self &optional [stage None]]
     (if (or (= stage "fit") (is stage None))
-      (let [df (.sample self.data-frame :frac 1)
+      (let [df (.sample self.data-frame :frac 1)      ; shuffle data
 
             raw-x (.to-numpy (get df self.params-x))
             raw-y (.to-numpy (get df self.params-y))
 
             transform-data (fn [data] 
-              (lfor (, idx x) (enumerate data)
-                (cond [(= self.trafo-type "box")
-                       (bct (np.array x) (get self.lambdas-x idx))] 
-                      [(= self.trafo-type "log")
-                       (np.log10 (np.abs x)) ]
-                      [True
-                       (np.array x)])))
+              (cond [(= self.trafo-type "box")
+                     (lfor (, idx x) (enumerate data)
+                           (bct (np.array x) (get self.lambdas-x idx)))] 
+                    [(= self.trafo-type "log")
+                     (np.where (!= 0.0 data) (np.log10 (np.abs data)) 0.0)]
+                    [True
+                     (np.array x)]))
 
             _ (when self.trafo-type
                 (setv (get raw-x.T self.trafo-mask-x)
@@ -175,7 +175,8 @@
                        ^list trafo-mask-y
                        ^list lambdas-x
                        ^list lambdas-y
-                  &optional ^int   [batch-size 2000]
+                  &optional ^str   [trafo-type None]
+                            ^int   [batch-size 2000]
                             ^float [test-split 0.2]
                             ^int   [num-workers (-> os (.cpu-count) 
                                                        (/ 2) 
@@ -184,7 +185,7 @@
                             ^int   [rng-seed 666]
                             ^bool  [scale True]]
     (.__init__ (super) params-x params-y trafo-mask-x trafo-mask-y 
-                       lambdas-x lambdas-y
+                       lambdas-x lambdas-y :trafo-type trafo-type
                        :batch-size batch-size :test-split test-split 
                        :num-workers num-workers :rng-seed rng-seed
                        :scale scale)
@@ -198,7 +199,8 @@
                        ^list trafo-mask-y
                        ^list lambdas-x
                        ^list lambdas-y
-                  &optional ^int   [batch-size 2000]
+                  &optional ^str   [trafo-type None]
+                            ^int   [batch-size 2000]
                             ^float [test-split 0.2]
                             ^int   [num-workers (-> os (.cpu-count) 
                                                        (/ 2) 
@@ -207,7 +209,7 @@
                             ^int   [rng-seed 666]
                             ^bool  [scale True]]
     (.__init__ (super) params-x params-y trafo-mask-x trafo-mask-y 
-                       lambdas-x lambdas-y
+                       lambdas-x lambdas-y :trafo-type trafo-type
                        :batch-size batch-size :test-split test-split 
                        :num-workers num-workers :rng-seed rng-seed
                        :scale scale)
