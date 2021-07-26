@@ -23,7 +23,8 @@
                        ^list trafo-mask-y
                        ^list lambdas-x
                        ^list lambdas-y
-                  &optional ^int   [batch-size 2000]
+                  &optional ^str   [trafo-type None]
+                            ^int   [batch-size 2000]
                             ^float [test-split 0.2]
                             ^int   [num-workers (-> os (.cpu-count) (/ 2) (int) (max 1))]
                             ^int   [rng-seed 666]
@@ -40,6 +41,7 @@
                     or a list with a single value, resulting in the same for all.
 
     Optional Args:
+      trafo_type:   type of data transformation ∈ [None, 'log', 'box']
       batch_size:   default = 2000
       test_split:   split ratio between training and test data (default = 0.2)
       num_workers:  number of cpu cores for loading data (default = 6)
@@ -70,8 +72,9 @@
 
     ;; Converting the column names based trafo mask to a bit mask
     ;; for accessing a np array instead of a data frame
-    (setv self.mask-x trafo-mask-x
-          self.mask-y trafo-mask-y
+    (setv self.trafo-type   trafo-type
+          self.mask-x       trafo-mask-x
+          self.mask-y       trafo-mask-y
           self.trafo-mask-x (list (map (fn [param] (in param trafo-mask-x)) 
                                        params-x))
           self.trafo-mask-y (list (map (fn [param] (in param trafo-mask-y)) 
@@ -92,15 +95,30 @@
             raw-x (.to-numpy (get df self.params-x))
             raw-y (.to-numpy (get df self.params-y))
 
-            _ (when (and (any self.trafo-mask-x) self.lambdas-x)
-                (setv (get raw-x.T self.trafo-mask-x)
-                      (lfor (, idx x) (enumerate (get raw-x.T self.trafo-mask-x))
-                        (bct (np.array x) (get self.lambdas-x idx)))))
+            transform-data (fn [data] 
+              (lfor (, idx x) (enumerate data)
+                (cond [(= self.trafo-type "box")
+                       (bct (np.array x) (get self.lambdas-x idx))] 
+                      [(= self.trafo-type "log")
+                       (np.log10 (np.abs x)) ]
+                      [True
+                       (np.array x)])))
 
-            _ (when (and (any self.trafo-mask-y) self.lambdas-y)
+            _ (when self.trafo-type
+                (setv (get raw-x.T self.trafo-mask-x)
+                      (transform-data (get raw-x.T self.trafo-mask-x)))
                 (setv (get raw-y.T self.trafo-mask-y)
-                      (lfor (, idx y) (enumerate (get raw-y.T self.trafo-mask-y))
-                        (bct (np.array y) (get self.lambdas-y idx)))))
+                      (transform-data (get raw-y.T self.trafo-mask-y))))
+
+            ;_ (when (and (any self.trafo-mask-x) self.lambdas-x)
+            ;    (setv (get raw-x.T self.trafo-mask-x)
+            ;          (lfor (, idx x) (enumerate (get raw-x.T self.trafo-mask-x))
+            ;            (bct (np.array x) (get self.lambdas-x idx)))))
+
+            ;_ (when (and (any self.trafo-mask-y) self.lambdas-y)
+            ;    (setv (get raw-y.T self.trafo-mask-y)
+            ;          (lfor (, idx y) (enumerate (get raw-y.T self.trafo-mask-y))
+            ;            (bct (np.array y) (get self.lambdas-y idx)))))
 
             data-x (if self.scale (np.apply-along-axis scl 0 raw-x) raw-x)
             data-y (if self.scale (np.apply-along-axis scl 0 raw-y) raw-y)
