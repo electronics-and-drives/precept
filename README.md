@@ -12,11 +12,10 @@ data to model the behavior of primitive devices.
 
 Tested with:
 
-- `conda`: 4.9.2
-- `pip`: 21.0.1
-- `python`: 3.8.8
-- `CUDA`: 11.2
-- `Nvidia Driver`: 460.73.01
+- `pip >= 21.0.1`
+- `python >= 3.8.8`
+- `CUDA == 11.2`
+- `Nvidia Driver >= 460.73.01`
 
 Everything else is specified in `requirements.txt`. Other/Higher versions of
 these dependencies may work, but are untested.
@@ -64,11 +63,12 @@ model:
   beta_1:        <float, default = 0.9>
   beta_2:        <float, default = 0.999>
 data:
-  data_path:     <string>   # Path to HDF5 database
-  params_x:      <[string]> # List of input column names 
-  params_y:      <[string]> # List of output column names 
-  trafo_mask_x:  <[string]> # List of input paramters that will be transformed
-  trafo_mask_y:  <[string]> # List of output paramters that will be transformed
+  data_path:     <string>       # Path to HDF5 database
+  params_x:      <[string]>     # List of input column names 
+  params_y:      <[string]>     # List of output column names 
+  trafo_type:    <None|log|box> # Type of transformation ∈ [None, 'log', 'box']
+  trafo_mask_x:  <[string]>     # List of input paramters that will be transformed
+  trafo_mask_y:  <[string]>     # List of output paramters that will be transformed
   batch_size:    <int, default = 2000>
   test_split:    <float, default = 0.2>
   num_workers:   <int, default = 6>
@@ -216,6 +216,7 @@ soon<sup>TM</sup>
     - [ ] Add toy models for inference examples
     - [ ] Notebooks as well
 - [ ] Deprecate transformation, should be part of manual preprocessing
+- [X] Add support for logarithmic transformation
 - [ ] Add better logging
 - [ ] Add manpages for CLI(1), API(8) and CFG(5)
 - [ ] Add tests
