@@ -54,18 +54,19 @@
           model-ckpt  (PreceptModule.load-from-checkpoint best-path)
 
           model-file  (.format "{}/{}-model.yml" model-path device-name)
-          model-data  { "num_x"     self.datamodule.num-x
-                        "num_y"     self.datamodule.num-y
-                        "params_x"  self.datamodule.params-x
-                        "params_y"  self.datamodule.params-y
-                        "mask_x"    self.datamodule.mask-x
-                        "mask_y"    self.datamodule.mask-y
-                        "min_x"     (.tolist self.datamodule.min-x)
-                        "max_x"     (.tolist self.datamodule.max-x)
-                        "min_y"     (.tolist self.datamodule.min-y)
-                        "max_y"     (.tolist self.datamodule.max-y)
-                        "lambdas_x" (list (filter (fn [l] l) self.datamodule.lambdas-x))
-                        "lambdas_y" (list (filter (fn [l] l) self.datamodule.lambdas-y)) } ]
+          model-data  { "num_x"      self.datamodule.num-x
+                        "num_y"      self.datamodule.num-y
+                        "params_x"   self.datamodule.params-x
+                        "params_y"   self.datamodule.params-y
+                        "mask_x"     self.datamodule.mask-x
+                        "mask_y"     self.datamodule.mask-y
+                        "min_x"      (.tolist self.datamodule.min-x)
+                        "max_x"      (.tolist self.datamodule.max-x)
+                        "min_y"      (.tolist self.datamodule.min-y)
+                        "max_y"      (.tolist self.datamodule.max-y)
+                        "trafo_type" self.datamodule.trafo-type
+                        "lambdas_x"  (list (filter (fn [l] l) self.datamodule.lambdas-x))
+                        "lambdas_y"  (list (filter (fn [l] l) self.datamodule.lambdas-y)) } ]
 
       (.eval model-ckpt)
       (.freeze model-ckpt)
